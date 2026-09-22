@@ -42,3 +42,12 @@ yarn-error.*
 # generated native folders
 /ios
 /android
+
+# coverage
+coverage/
+
+# Obsidian (per-user state; the shared vault config is committed)
+docs/.obsidian/workspace*.json
+docs/.obsidian/cache
+docs/.obsidian/plugins/
+docs/.obsidian/hotkeys.json
