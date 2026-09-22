@@ -46,8 +46,14 @@ yarn-error.*
 # coverage
 coverage/
 
-# Obsidian (per-user state; the shared vault config is committed)
-docs/.obsidian/workspace*.json
-docs/.obsidian/cache
-docs/.obsidian/plugins/
-docs/.obsidian/hotkeys.json
+# Obsidian
+# The shared vault config at docs/.obsidian/ IS committed (see the negations
+# below) so the whole team gets the same Templates setup. Everything else is
+# per-user state, including a stray vault someone creates by opening a
+# subfolder instead of docs/ itself.
+**/.obsidian/
+!docs/.obsidian/
+docs/.obsidian/*
+!docs/.obsidian/app.json
+!docs/.obsidian/core-plugins.json
+!docs/.obsidian/templates.json

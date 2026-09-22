@@ -5,3 +5,7 @@ web-build/
 coverage/
 package-lock.json
 assets/
+
+# Obsidian generates these; they are not ours to format
+.obsidian/
+**/.obsidian/
