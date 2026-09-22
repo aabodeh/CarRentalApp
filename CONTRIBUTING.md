@@ -123,8 +123,10 @@ Full workflow: [`docs/ai-log/README.md`](docs/ai-log/README.md).
 
 ## Adding a dependency
 
-- Install Expo-related packages with `npx expo install <pkg>` (add `-- --save-dev` for dev
-  dependencies) so the version stays compatible with SDK 57. Do not hand-edit versions.
+- Install Expo-related packages with `npx expo install <pkg>` (add `--dev` for dev dependencies)
+  so the version stays compatible with SDK 57. Do not hand-edit versions.
+  **It is `--dev`, not `-- --save-dev`** — the latter puts SDK-managed packages into `dependencies`.
+  See `docs/ai-log/failures/FL-003 expo install dev flag puts packages in dependencies.md`.
 - Justify it in the PR description: what it does, why the standard library or something we
   already depend on is not enough, and roughly how big it is.
 - One new dependency per PR where possible, so it can be discussed on its own.

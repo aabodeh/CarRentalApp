@@ -9,3 +9,8 @@ assets/
 # Obsidian generates these; they are not ours to format
 .obsidian/
 **/.obsidian/
+
+# Verbatim AI prompts — these are evidence, not prose.
+# Prettier reflows numbered lists and merges lines, which silently alters the
+# record. Never format anything in here.
+docs/ai-log/prompts/
