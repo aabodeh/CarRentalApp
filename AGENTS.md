@@ -7,9 +7,14 @@ Read this before writing code. It applies to humans and to AI assistants equally
 Read the exact versioned docs at https://docs.expo.dev/versions/v57.0.0/ before writing any code.
 Expo SDK 57 is newer than most models' training data — APIs you "remember" may not exist.
 
-Install Expo-related packages with `npx expo install <pkg>` (add `-- --save-dev` for dev
-dependencies) so versions stay compatible with the SDK. Never hand-edit a version in
-`package.json` to satisfy a guess.
+Install Expo-related packages with `npx expo install <pkg>` (add `--dev` for dev dependencies)
+so versions stay compatible with the SDK. Never hand-edit a version in `package.json` to satisfy
+a guess.
+
+Use `--dev`, not `-- --save-dev`. The latter looks equivalent and is not: Expo writes SDK-managed
+packages into `dependencies` itself before npm ever sees the flag, so test tooling silently becomes
+a runtime dependency. See
+`docs/ai-log/failures/FL-003 expo install dev flag puts packages in dependencies.md`.
 
 ## Project
 
@@ -204,7 +209,33 @@ log it as a failure.
 Append to this section whenever an agent gets something wrong in a way that would repeat.
 Each entry: what the agent did, why it was wrong, what to do instead. Link the `FL-###` note.
 
-This section is deliberately short right now. It is expected to grow — its git history is
-evidence of what we learned.
+Its git history is evidence of what we learned.
 
 <!-- Add entries below. Newest last. -->
+
+### Do not mock a warning you have not seen
+
+An agent setting up Jest wrote a `jest.setup.js` mocking
+`react-native/Libraries/Animated/NativeAnimatedHelper` — a remembered path that does not exist in
+React Native 0.86 — to silence a warning that had never appeared. The suite failed to run outright.
+
+**Instead:** run the suite first. Mock only what actually breaks. `jest-expo` already mocks the
+native side of Expo and React Native. See `docs/ai-log/failures/FL-001 stale react native animated mock.md`.
+
+### Graded metadata fields need definitions, not just an enum
+
+An agent filed a tooling session's AI log entry under `area: structure`, which is the design-doc
+plane (navigation and data model), not tooling. Given a list of allowed values, an agent picks a
+plausible-sounding one.
+
+**Instead:** when a field is graded, write the distinction next to it. Tooling and infrastructure are
+`area: code`. See `docs/ai-log/failures/FL-002 wrong area for setup log entry.md`.
+
+### Never document the thing you just worked around
+
+An agent hit `npx expo install … -- --save-dev` putting packages in `dependencies`, moved them by
+hand — and then wrote that same broken command into this file as the rule for the whole team.
+
+**Instead:** if you worked around something, the workaround is the news. Fix the rule, do not enshrine
+the bug. Treat any rule an agent adds to AGENTS.md as a claim to be tested.
+See `docs/ai-log/failures/FL-003 expo install dev flag puts packages in dependencies.md`.
