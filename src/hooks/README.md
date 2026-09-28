@@ -2,7 +2,12 @@
 
 Custom React hooks (`useX`) that connect the UI to repositories and context.
 
-**Goes here:** `useCars`, `useBooking`, `useSyncStatus` — hooks that own
+**Goes here now:**
+
+- `useTheme`: the colour tokens for the current light/dark scheme.
+- `useReducedMotion`: true when the OS asks for reduced motion. Every animation must honour it.
+
+**Goes here later:** `useCars`, `useBooking`, `useSyncStatus` — hooks that own
 loading/error/data state and call a repository.
 
 **Does not go here:** raw network or storage calls. A hook calls a repository;
