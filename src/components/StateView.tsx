@@ -1,8 +1,9 @@
 import { useMemo } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
 import { useTheme } from '../hooks/useTheme';
-import { minTouchTarget, opacity, radii, spacing, typography, type ColorTokens } from '../theme';
+import { spacing, typography, type ColorTokens } from '../theme';
+import PrimaryButton from './PrimaryButton';
 
 export type StateViewProps = {
   title: string;
@@ -27,13 +28,9 @@ export default function StateView({ title, message, actionLabel, onAction }: Sta
       </Text>
       <Text style={styles.message}>{message}</Text>
       {actionLabel && onAction ? (
-        <Pressable
-          accessibilityRole="button"
-          onPress={onAction}
-          style={({ pressed }) => [styles.button, pressed && styles.buttonPressed]}
-        >
-          <Text style={styles.buttonLabel}>{actionLabel}</Text>
-        </Pressable>
+        <View style={styles.action}>
+          <PrimaryButton label={actionLabel} onPress={onAction} />
+        </View>
       ) : null}
     </View>
   );
@@ -54,21 +51,7 @@ const createStyles = (colors: ColorTokens) =>
       ...typography.body,
       color: colors.textMuted,
     },
-    button: {
-      minHeight: minTouchTarget,
-      minWidth: minTouchTarget,
-      justifyContent: 'center',
-      paddingHorizontal: spacing.xl,
-      paddingVertical: spacing.md,
+    action: {
       marginTop: spacing.sm,
-      borderRadius: radii.md,
-      backgroundColor: colors.accent,
-    },
-    buttonPressed: {
-      opacity: opacity.pressed,
-    },
-    buttonLabel: {
-      ...typography.button,
-      color: colors.onAccent,
     },
   });
