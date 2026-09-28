@@ -37,7 +37,7 @@ Chronological. A-001 to A-007 are from 2026-09-22; A-008 and A-009 are from 2026
 | [[A-006 ai log backfill prompt]]                    | Claude chat | chat    | docs | Drafting the backfill prompt [[P4]]                                                                              |
 | [[A-007 ai log backfill]]                           | Claude Code | agentic | docs | This chronological backfill ([PR #3](https://github.com/aabodeh/CarRentalApp/pull/3))                            |
 | [[A-008 domain types design system and dummy data]] | Claude Code | agentic | code | PR 1 foundation: types, tokens, a11y rules, dummy cars ([PR #4](https://github.com/aabodeh/CarRentalApp/pull/4)) |
-| [[A-009 car repository hook and list screen]]       | Claude Code | agentic | code | PR 2: carRepository, useCars/useCar, list screen with motion and a11y [[P6]]                                     |
+| [[A-009 car repository hook and list screen]]       | Claude Code | agentic | code | Car list: repository, hooks, motion, a11y ([PR #5](https://github.com/aabodeh/CarRentalApp/pull/5))              |
 
 ## Index — failures
 

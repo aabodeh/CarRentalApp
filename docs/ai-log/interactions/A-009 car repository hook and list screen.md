@@ -9,15 +9,16 @@ task: PR 2 — renter fields on Booking, carRepository, useCars/useCar, CarCard/
 prompt_or_link: '[[P6]]'
 verification: TODO (Moha)
 decision: TODO (Moha)
-related_pr:
+related_pr: https://github.com/aabodeh/CarRentalApp/pull/5
 ---
 
 # A-009 — car repository, hook and list screen
 
 ## Prompt
 
-[[P6]], pasted verbatim into Claude Code. The PR is stacked on PR #4 (`feat/domain-and-design-system`)
-without touching its commits. The prompt asked for:
+[[P6]], pasted verbatim into Claude Code. The PR was meant to stack on PR #4
+(`feat/domain-and-design-system`). #4 was squash-merged mid-session, so, with Moha's approval, the
+branch was rebased onto `main` and the PR opened against `main`. The prompt asked for:
 
 - renter fields on `Booking`
 - the repository seam with simulated latency
