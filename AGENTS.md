@@ -61,6 +61,12 @@ should be a change _inside `src/repositories/` and below_, with no screen edited
 This is not a suggestion. ESLint fails the build on it — see `eslint.config.js`. If a rule
 fires, do not add an `eslint-disable`; add or extend a repository instead.
 
+**Hooks expose state as a discriminated union, never loose booleans.** `useCars()` returns
+`{ status: 'loading' } | { status: 'error'; error; retry } | { status: 'empty' } | { status: 'ready'; cars }`,
+and the screen `switch`es on `status`. TypeScript then refuses to compile a screen that forgot a state.
+Something orthogonal to the status, like `isRefreshing` for pull-to-refresh, sits next to the union
+and not inside it. A hook ignores any answer that arrives after it unmounts. See `src/hooks/useCars.ts`.
+
 The NFRs land in specific places:
 
 | NFR              | Where it lives                                                                       |
