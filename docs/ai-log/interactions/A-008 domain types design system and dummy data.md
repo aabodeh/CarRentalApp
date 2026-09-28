@@ -9,7 +9,7 @@ task: PR 1 foundation — domain types, design tokens, motion/a11y rules, dummy 
 prompt_or_link: '[[P5]]'
 verification: TODO (Moha)
 decision: TODO (Moha)
-related_pr:
+related_pr: https://github.com/aabodeh/CarRentalApp/pull/4
 ---
 
 # A-008 — domain types, design system and dummy data

@@ -27,16 +27,16 @@ before the deadline.
 
 Chronological. A-001 to A-007 are from 2026-09-22; A-008 is from 2026-09-28.
 
-| ID                                                  | Tool        | Mode    | Area | What                                                                                                          |
-| --------------------------------------------------- | ----------- | ------- | ---- | ------------------------------------------------------------------------------------------------------------- |
-| [[A-001 course context and initial setup prompt]]   | Claude chat | chat    | docs | Course context from the Drive materials, repo review, drafting the setup prompt [[P1]]                        |
-| [[A-002 setup plan review]]                         | Claude chat | chat    | code | Reviewing Claude Code's setup plan before execution; produced [[P2]]                                          |
-| [[A-003 project setup scaffolding]]                 | Claude Code | agentic | code | Tooling, folder skeleton, AGENTS.md, this vault, CI ([PR #1](https://github.com/aabodeh/CarRentalApp/pull/1)) |
-| [[A-004 setup review and repo config prompt]]       | Claude chat | chat    | code | Reviewing the setup result; drafting [[P3]]                                                                   |
-| [[A-005 repo configuration and expo patch]]         | Claude Code | agentic | code | CI check, branch protection handoff, expo patch ([PR #2](https://github.com/aabodeh/CarRentalApp/pull/2))     |
-| [[A-006 ai log backfill prompt]]                    | Claude chat | chat    | docs | Drafting the backfill prompt [[P4]]                                                                           |
-| [[A-007 ai log backfill]]                           | Claude Code | agentic | docs | This chronological backfill ([PR #3](https://github.com/aabodeh/CarRentalApp/pull/3))                         |
-| [[A-008 domain types design system and dummy data]] | Claude Code | agentic | code | PR 1 foundation: types, design tokens, motion/a11y rules, dummy cars, utils [[P5]]                            |
+| ID                                                  | Tool        | Mode    | Area | What                                                                                                             |
+| --------------------------------------------------- | ----------- | ------- | ---- | ---------------------------------------------------------------------------------------------------------------- |
+| [[A-001 course context and initial setup prompt]]   | Claude chat | chat    | docs | Course context from the Drive materials, repo review, drafting the setup prompt [[P1]]                           |
+| [[A-002 setup plan review]]                         | Claude chat | chat    | code | Reviewing Claude Code's setup plan before execution; produced [[P2]]                                             |
+| [[A-003 project setup scaffolding]]                 | Claude Code | agentic | code | Tooling, folder skeleton, AGENTS.md, this vault, CI ([PR #1](https://github.com/aabodeh/CarRentalApp/pull/1))    |
+| [[A-004 setup review and repo config prompt]]       | Claude chat | chat    | code | Reviewing the setup result; drafting [[P3]]                                                                      |
+| [[A-005 repo configuration and expo patch]]         | Claude Code | agentic | code | CI check, branch protection handoff, expo patch ([PR #2](https://github.com/aabodeh/CarRentalApp/pull/2))        |
+| [[A-006 ai log backfill prompt]]                    | Claude chat | chat    | docs | Drafting the backfill prompt [[P4]]                                                                              |
+| [[A-007 ai log backfill]]                           | Claude Code | agentic | docs | This chronological backfill ([PR #3](https://github.com/aabodeh/CarRentalApp/pull/3))                            |
+| [[A-008 domain types design system and dummy data]] | Claude Code | agentic | code | PR 1 foundation: types, tokens, a11y rules, dummy cars ([PR #4](https://github.com/aabodeh/CarRentalApp/pull/4)) |
 
 ## Index — failures
 
