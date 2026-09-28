@@ -117,8 +117,28 @@ the design document. Update the diagram first, then mirror it in `src/types/`.
 
 - `StyleSheet.create` at the bottom of the file. No inline style objects — they allocate on
   every render and cannot be reused.
-- Shared values (colours, spacing) come from `src/theme/`. Do not hard-code a hex value that
-  already exists there.
+- Every colour, spacing value, radius, font size and animation duration comes from
+  `src/theme/`. Nothing in `src/` hard-codes a hex, a size or a duration. If the token you need
+  does not exist, add it to the theme (and to its README) rather than inlining it.
+- Colours come from `useTheme().colors`, not from `lightColors` directly, so dark mode works
+  when we switch it on. Read `src/theme/README.md` for the design direction.
+
+**Motion and accessibility**
+
+These are accessibility requirements, audited and graded — not polish to skip under time pressure.
+
+- **Every animation degrades to no animation when reduce motion is on.** Read
+  `useReducedMotion()` from `src/hooks/` and use a duration of 0, or skip the animation
+  entirely, when it returns `true`. An animation that ignores it is a bug.
+- Durations and easings come from `src/theme/motion.ts`. No ad-hoc millisecond values.
+- Anything tappable is at least `minTouchTarget` (44pt) in both dimensions. Use `hitSlop` when
+  the visible element must be smaller.
+- Never set `allowFontScaling={false}` or `maxFontSizeMultiplier`. Layouts must work at 200%
+  text size: let text wrap, avoid fixed heights on text containers.
+- Status is never shown by colour alone. The `status.*` colours always come with a label or
+  an icon.
+- Every new colour pair gets a row in `__tests__/theme/colors.test.ts`, which checks it against
+  WCAG AA.
 
 **Naming**
 
@@ -239,3 +259,14 @@ hand — and then wrote that same broken command into this file as the rule for 
 **Instead:** if you worked around something, the workaround is the news. Fix the rule, do not enshrine
 the bug. Treat any rule an agent adds to AGENTS.md as a claim to be tested.
 See `docs/ai-log/failures/FL-003 expo install dev flag puts packages in dependencies.md`.
+
+### Import Google Fonts per weight, not from the package root
+
+An agent loaded three Schibsted Grotesk weights with
+`import { SchibstedGrotesk_400Regular, … } from '@expo-google-fonts/schibsted-grotesk'`. The package
+root `require()`s all twelve `.ttf` files, so the bundle shipped ~1.2 MB of fonts to use ~300 KB.
+Tests and typecheck were green; only `npx expo export` listing the bundled assets showed it.
+
+**Instead:** import each weight from its subpath (`…/schibsted-grotesk/400Regular`), and after adding
+any asset-bearing package, run `npx expo export` once and read the asset list.
+See `docs/ai-log/failures/FL-004 font package root bundles every weight.md`.
