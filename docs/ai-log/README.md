@@ -25,7 +25,7 @@ before the deadline.
 
 ## Index — interactions
 
-Chronological. A-001 to A-007 are from 2026-09-22; A-008 is from 2026-09-28.
+Chronological. A-001 to A-007 are from 2026-09-22; A-008 and A-009 are from 2026-09-28.
 
 | ID                                                  | Tool        | Mode    | Area | What                                                                                                             |
 | --------------------------------------------------- | ----------- | ------- | ---- | ---------------------------------------------------------------------------------------------------------------- |
@@ -37,15 +37,19 @@ Chronological. A-001 to A-007 are from 2026-09-22; A-008 is from 2026-09-28.
 | [[A-006 ai log backfill prompt]]                    | Claude chat | chat    | docs | Drafting the backfill prompt [[P4]]                                                                              |
 | [[A-007 ai log backfill]]                           | Claude Code | agentic | docs | This chronological backfill ([PR #3](https://github.com/aabodeh/CarRentalApp/pull/3))                            |
 | [[A-008 domain types design system and dummy data]] | Claude Code | agentic | code | PR 1 foundation: types, tokens, a11y rules, dummy cars ([PR #4](https://github.com/aabodeh/CarRentalApp/pull/4)) |
+| [[A-009 car repository hook and list screen]]       | Claude Code | agentic | code | Car list: repository, hooks, motion, a11y ([PR #5](https://github.com/aabodeh/CarRentalApp/pull/5))              |
 
 ## Index — failures
 
-| ID                                                             | From         | What went wrong                                                        | Caught by                            |
-| -------------------------------------------------------------- | ------------ | ---------------------------------------------------------------------- | ------------------------------------ |
-| [[FL-001 stale react native animated mock]]                    | A-003        | Mocked a React Native module path that does not exist in 0.86          | The test suite failed to run         |
-| [[FL-002 wrong area for setup log entry]]                      | A-002, A-003 | Filed a tooling session under `area: structure`                        | Plan review, before execution        |
-| [[FL-003 expo install dev flag puts packages in dependencies]] | A-003        | Wrote a broken `npx expo install` flag into AGENTS.md as the team rule | Manual reproduction during A-007     |
-| [[FL-004 font package root bundles every weight]]              | A-008        | Font package root import bundled all 12 weights (~1.2 MB) to use 3     | Reading the `expo export` asset list |
+| ID                                                               | From         | What went wrong                                                                   | Caught by                            |
+| ---------------------------------------------------------------- | ------------ | --------------------------------------------------------------------------------- | ------------------------------------ |
+| [[FL-001 stale react native animated mock]]                      | A-003        | Mocked a React Native module path that does not exist in 0.86                     | The test suite failed to run         |
+| [[FL-002 wrong area for setup log entry]]                        | A-002, A-003 | Filed a tooling session under `area: structure`                                   | Plan review, before execution        |
+| [[FL-003 expo install dev flag puts packages in dependencies]]   | A-003        | Wrote a broken `npx expo install` flag into AGENTS.md as the team rule            | Manual reproduction during A-007     |
+| [[FL-004 font package root bundles every weight]]                | A-008        | Font package root import bundled all 12 weights (~1.2 MB) to use 3                | Reading the `expo export` asset list |
+| [[FL-005 eslint disable written to silence a warning]]           | A-009        | Wrote an `eslint-disable` to silence `exhaustive-deps` instead of fixing the deps | AI self-review; no tool would have   |
+| [[FL-006 reanimated value assignment rejected by compiler lint]] | A-009        | Used `sv.value =`, which the React Compiler lint rejects; needs `.get()`/`.set()` | Lint                                 |
+| [[FL-007 safe area jest mock used without default]]              | A-009        | Wired the safe-area Jest mock without `.default`, crashing App in tests           | The App smoke test                   |
 
 Add more as they happen.
 
@@ -60,6 +64,7 @@ Long prompts live in `prompts/` and are wiki-linked from the entries that produc
 | [[P3]] — repo configuration prompt  | A-004          | A-005   |
 | [[P4]] — AI dossier backfill prompt | A-006          | A-007   |
 | [[P5]] — PR 1 foundation prompt     | pasted by Moha | A-008   |
+| [[P6]] — PR 2 car list prompt       | pasted by Moha | A-009   |
 
 ## Reading this vault in Obsidian
 

@@ -1,17 +1,24 @@
-import { StyleSheet, Text, View } from 'react-native';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { StyleSheet, Text } from 'react-native';
 
-export default function CarDetailsScreen() {
+import Screen from '../components/Screen';
+import type { RootStackParamList } from '../navigation/types';
+import { spacing, typography } from '../theme';
+
+type Props = NativeStackScreenProps<RootStackParamList, 'CarDetails'>;
+
+/** Placeholder: the real details screen (via `useCar`) is the next PR. */
+export default function CarDetailsScreen({ route }: Props) {
   return (
-    <View style={styles.container}>
-      <Text>Car Details</Text>
-    </View>
+    <Screen>
+      <Text style={styles.text}>Car details: {route.params.carId}</Text>
+    </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+  text: {
+    ...typography.body,
+    padding: spacing.lg,
   },
 });

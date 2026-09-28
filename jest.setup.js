@@ -5,9 +5,18 @@
  * mocks for native modules that every suite needs. Test-specific mocks belong
  * in the test file that needs them.
  *
- * It is intentionally empty right now: the `jest-expo` preset already mocks the
- * native side of the Expo SDK and React Native. Add to it only when a mock is
- * genuinely needed by every suite.
+ * The `jest-expo` preset already mocks the native side of the Expo SDK and React
+ * Native. Add to this file only when a mock is genuinely needed — i.e. after a
+ * suite has actually failed without it (see AGENTS.md > Lessons learned).
  */
 
-export {};
+/**
+ * Reanimated 4 runs on react-native-worklets, whose native module does not exist under Jest:
+ * without this, any suite that imports an animated component fails to load with
+ * "Cannot read properties of undefined (reading 'loadUnpackers')".
+ * Both lines are the libraries' own documented Jest setup:
+ * https://docs.swmansion.com/react-native-worklets/docs/guides/testing/
+ * https://docs.swmansion.com/react-native-reanimated/docs/guides/testing/
+ */
+jest.mock('react-native-worklets', () => require('react-native-worklets/src/mock'));
+require('react-native-reanimated').setUpTests();

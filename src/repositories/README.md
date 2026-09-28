@@ -23,3 +23,13 @@ This is where the mandatory NFRs land:
 
 Swapping dummy data for the real API should be a change _inside this folder
 only_. If a swap forces you to edit a screen, the boundary was drawn wrong.
+
+## Today
+
+- `carRepository.ts`: `getCars()` and `getCarById(id)`, backed by `src/data/dummy/`. It answers
+  after `SIMULATED_LATENCY_MS` (400 ms, **temporary**) so the UI has real loading states now.
+  `getCarById` throws `CarNotFoundError` for an unknown id. The `CarRepository` type is the contract
+  the API-backed version will implement.
+
+In tests, stub a repository method with `jest.spyOn(carRepository, 'getCars')` instead of mocking
+the whole module.

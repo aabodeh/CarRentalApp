@@ -33,3 +33,17 @@ export const easings = {
 
 /** Scale applied to a pressed card or button. Subtle on purpose. */
 export const pressScale = 0.97;
+
+/**
+ * List entrance: cards fade in and rise by `distance` points, one after another. Only the first
+ * `maxItems` stagger — the last one starts at (maxItems − 1) × step = 300 ms. Cards that mount
+ * later while scrolling appear without an entrance, because a card fading in mid-scroll reads as lag.
+ */
+export const stagger = { step: 60, maxItems: 6 } as const;
+export const entrance = { distance: 12 } as const;
+
+/** Spring for press feedback: quick and settled, no visible wobble. Reanimated `withSpring` config. */
+export const pressSpring = { damping: 20, stiffness: 300, mass: 1 } as const;
+
+/** Skeleton pulse: opacity swings between 1 and `minOpacity` every `duration` ms, then back. */
+export const shimmer = { duration: 900, minOpacity: 0.4 } as const;
