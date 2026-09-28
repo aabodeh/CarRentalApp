@@ -1,11 +1,15 @@
 # types
 
-Shared domain types: `Car`, `Booking`, `SyncStatus`, and the DTOs the API
-returns.
+Shared domain types: `Car`, `Booking`, `SyncStatus`, and later the DTOs the API returns.
 
-**These are not written yet, on purpose.** They come from the class diagram in
-our design document, so that the code and the report agree. Do not invent them
-ahead of the diagram — invent them in the diagram first, then mirror them here.
+They mirror the class diagram in our design document, so the code and the report agree.
+**Change the diagram first, then mirror it here.** Do not invent a field in code.
 
-Types used by exactly one module stay next to that module. Only genuinely
-shared types live here.
+- `car.ts`: `Car`, `Transmission`, `Fuel`.
+- `booking.ts`: `Booking`, `SyncStatus`. `syncStatus` is local state that the repository sets
+  (K3). The server never sends it.
+- Dates are strings: `YYYY-MM-DD` for booking days, full ISO-8601 for `createdAt`. A `Date`
+  object does not survive a JSON round-trip through storage or the API.
+
+Import from `src/types`, not from the individual files. Types used by exactly one module stay
+next to that module.

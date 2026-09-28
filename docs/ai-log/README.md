@@ -25,38 +25,41 @@ before the deadline.
 
 ## Index — interactions
 
-Chronological. Every entry is from 2026-09-22.
+Chronological. A-001 to A-007 are from 2026-09-22; A-008 is from 2026-09-28.
 
-| ID                                                | Tool        | Mode    | Area | What                                                                                                          |
-| ------------------------------------------------- | ----------- | ------- | ---- | ------------------------------------------------------------------------------------------------------------- |
-| [[A-001 course context and initial setup prompt]] | Claude chat | chat    | docs | Course context from the Drive materials, repo review, drafting the setup prompt [[P1]]                        |
-| [[A-002 setup plan review]]                       | Claude chat | chat    | code | Reviewing Claude Code's setup plan before execution; produced [[P2]]                                          |
-| [[A-003 project setup scaffolding]]               | Claude Code | agentic | code | Tooling, folder skeleton, AGENTS.md, this vault, CI ([PR #1](https://github.com/aabodeh/CarRentalApp/pull/1)) |
-| [[A-004 setup review and repo config prompt]]     | Claude chat | chat    | code | Reviewing the setup result; drafting [[P3]]                                                                   |
-| [[A-005 repo configuration and expo patch]]       | Claude Code | agentic | code | CI check, branch protection handoff, expo patch ([PR #2](https://github.com/aabodeh/CarRentalApp/pull/2))     |
-| [[A-006 ai log backfill prompt]]                  | Claude chat | chat    | docs | Drafting the backfill prompt [[P4]]                                                                           |
-| [[A-007 ai log backfill]]                         | Claude Code | agentic | docs | This chronological backfill ([PR #3](https://github.com/aabodeh/CarRentalApp/pull/3))                         |
+| ID                                                  | Tool        | Mode    | Area | What                                                                                                             |
+| --------------------------------------------------- | ----------- | ------- | ---- | ---------------------------------------------------------------------------------------------------------------- |
+| [[A-001 course context and initial setup prompt]]   | Claude chat | chat    | docs | Course context from the Drive materials, repo review, drafting the setup prompt [[P1]]                           |
+| [[A-002 setup plan review]]                         | Claude chat | chat    | code | Reviewing Claude Code's setup plan before execution; produced [[P2]]                                             |
+| [[A-003 project setup scaffolding]]                 | Claude Code | agentic | code | Tooling, folder skeleton, AGENTS.md, this vault, CI ([PR #1](https://github.com/aabodeh/CarRentalApp/pull/1))    |
+| [[A-004 setup review and repo config prompt]]       | Claude chat | chat    | code | Reviewing the setup result; drafting [[P3]]                                                                      |
+| [[A-005 repo configuration and expo patch]]         | Claude Code | agentic | code | CI check, branch protection handoff, expo patch ([PR #2](https://github.com/aabodeh/CarRentalApp/pull/2))        |
+| [[A-006 ai log backfill prompt]]                    | Claude chat | chat    | docs | Drafting the backfill prompt [[P4]]                                                                              |
+| [[A-007 ai log backfill]]                           | Claude Code | agentic | docs | This chronological backfill ([PR #3](https://github.com/aabodeh/CarRentalApp/pull/3))                            |
+| [[A-008 domain types design system and dummy data]] | Claude Code | agentic | code | PR 1 foundation: types, tokens, a11y rules, dummy cars ([PR #4](https://github.com/aabodeh/CarRentalApp/pull/4)) |
 
 ## Index — failures
 
-| ID                                                             | From         | What went wrong                                                        | Caught by                        |
-| -------------------------------------------------------------- | ------------ | ---------------------------------------------------------------------- | -------------------------------- |
-| [[FL-001 stale react native animated mock]]                    | A-003        | Mocked a React Native module path that does not exist in 0.86          | The test suite failed to run     |
-| [[FL-002 wrong area for setup log entry]]                      | A-002, A-003 | Filed a tooling session under `area: structure`                        | Plan review, before execution    |
-| [[FL-003 expo install dev flag puts packages in dependencies]] | A-003        | Wrote a broken `npx expo install` flag into AGENTS.md as the team rule | Manual reproduction during A-007 |
+| ID                                                             | From         | What went wrong                                                        | Caught by                            |
+| -------------------------------------------------------------- | ------------ | ---------------------------------------------------------------------- | ------------------------------------ |
+| [[FL-001 stale react native animated mock]]                    | A-003        | Mocked a React Native module path that does not exist in 0.86          | The test suite failed to run         |
+| [[FL-002 wrong area for setup log entry]]                      | A-002, A-003 | Filed a tooling session under `area: structure`                        | Plan review, before execution        |
+| [[FL-003 expo install dev flag puts packages in dependencies]] | A-003        | Wrote a broken `npx expo install` flag into AGENTS.md as the team rule | Manual reproduction during A-007     |
+| [[FL-004 font package root bundles every weight]]              | A-008        | Font package root import bundled all 12 weights (~1.2 MB) to use 3     | Reading the `expo export` asset list |
 
-Three entries, which is the course minimum. Add more as they happen.
+Add more as they happen.
 
 ## Prompts
 
 Long prompts live in `prompts/` and are wiki-linked from the entries that produced and consumed them.
 
-|                                     | Drafted in | Used in |
-| ----------------------------------- | ---------- | ------- |
-| [[P1]] — initial setup prompt       | A-001      | A-003   |
-| [[P2]] — plan review changes        | A-002      | A-003   |
-| [[P3]] — repo configuration prompt  | A-004      | A-005   |
-| [[P4]] — AI dossier backfill prompt | A-006      | A-007   |
+|                                     | Drafted in     | Used in |
+| ----------------------------------- | -------------- | ------- |
+| [[P1]] — initial setup prompt       | A-001          | A-003   |
+| [[P2]] — plan review changes        | A-002          | A-003   |
+| [[P3]] — repo configuration prompt  | A-004          | A-005   |
+| [[P4]] — AI dossier backfill prompt | A-006          | A-007   |
+| [[P5]] — PR 1 foundation prompt     | pasted by Moha | A-008   |
 
 ## Reading this vault in Obsidian
 
