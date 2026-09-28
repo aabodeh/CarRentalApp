@@ -21,6 +21,18 @@ above it gets the data from a hook and passes it down.
 - `StateView`: the shared empty / error / not-found presentation, with an optional action.
 - `Skeleton`: a card-shaped loading placeholder that pulses, and stays static on reduce motion.
 - `CarListHeader`: the car list's editorial title and count.
+- `PrimaryButton`: the one primary action style (accent, ≥44pt, light haptic, announced disabled).
+- `TextField` / `DateField`: a visible label, the error shown as "Error: …" text, and the error
+  folded into the accessibility label. RN has no `aria-describedby`. `DateField` uses the native
+  picker with `onValueChange`, because `onChange` is deprecated in datetimepicker 9.
+- `BookingSummary`: live day count and total, including the same-day rule as visible copy.
+- `SyncStatusBadge`: K3. The status in words plus a dot, announced when it changes.
+- `SpecGrid`: label/value pairs in two columns, each read as one phrase.
+- `BottomActionBar`: pinned bottom bar. It clears the home indicator (additive SafeAreaView) and
+  reports its height so the content can pad by it.
+- `CarDetails`, `CarHero`, `AnimatedSection`, `FadingHeaderTitle`: the details screen's pieces.
+- `CarStateView`: the loading / not-found / error view for any screen that loads one car.
+- `BookingForm` / `BookingConfirmation`: the booking screen's two states.
 
 **Theme-aware styles.** Colours change with light and dark mode, so a component builds its styles
 with `const createStyles = (colors: ColorTokens) => StyleSheet.create({...})` at the bottom of the

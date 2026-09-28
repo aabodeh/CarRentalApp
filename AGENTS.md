@@ -182,6 +182,13 @@ Rules:
 - Screens are tested with `@testing-library/react-native`, querying the way a user would
   (`getByText`, `getByRole`) rather than by test ID where a visible label exists.
 - A bug fix starts with a test that reproduces the bug.
+- **Time in tests.** Repositories answer after a simulated latency. Use fake timers and advance them
+  by explicit amounts (`jest.advanceTimersByTimeAsync(SIMULATED_LATENCY_MS)`), inside `act` when
+  anything is rendered. Never `runAllTimers`: the loading skeleton pulses forever, so "run every
+  timer" never finishes.
+- **Screens that need a provider or navigator context get it in the test.** For example, wrap the
+  screen in `BookingProvider repository={createInMemoryBookingRepository()}` and a
+  `HeaderHeightContext.Provider`, instead of mocking the hooks.
 
 ## Definition of Done
 

@@ -31,5 +31,12 @@ only_. If a swap forces you to edit a screen, the boundary was drawn wrong.
   `getCarById` throws `CarNotFoundError` for an unknown id. The `CarRepository` type is the contract
   the API-backed version will implement.
 
+- `bookingRepository.ts`: `createBooking(input)` re-validates the input (`validateBooking`),
+  prices the booking from the car's rate (never from the form) and saves it with
+  `syncStatus: 'pending'`. `syncBooking(id)` settles it to `'completed'`. **This is the K3 seam:** the
+  next PR replaces `syncBooking`'s internals with the API call and the retry queue (K2), and nothing
+  above it changes. `createInMemoryBookingRepository()` gives tests a fresh store.
+- `simulatedLatency.ts`: the shared temporary delay.
+
 In tests, stub a repository method with `jest.spyOn(carRepository, 'getCars')` instead of mocking
 the whole module.
