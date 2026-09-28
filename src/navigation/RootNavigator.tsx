@@ -20,9 +20,11 @@ export default function RootNavigator() {
       <Stack.Screen
         name="CarDetails"
         component={CarDetailsScreen}
-        options={{ title: 'Car Details' }}
+        // Empty until the car loads: the screen replaces it with the car's name, which fades in
+        // once the on-page name has scrolled away.
+        options={{ title: '' }}
       />
-      <Stack.Screen name="Booking" component={BookingScreen} options={{ title: 'Booking' }} />
+      <Stack.Screen name="Booking" component={BookingScreen} options={{ title: 'Book' }} />
     </Stack.Navigator>
   );
 }
