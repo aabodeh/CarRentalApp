@@ -1,7 +1,4 @@
-import DateTimePicker, {
-  DateTimePickerAndroid,
-  type DateTimePickerEvent,
-} from '@react-native-community/datetimepicker';
+import DateTimePicker, { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
 import { useMemo } from 'react';
 import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 
@@ -33,18 +30,16 @@ export default function DateField({ label, value, onChange, minimumDate, error }
   const accessibilityLabel = error ? `${label}, error: ${error}` : label;
   const minimum = minimumDate ? isoToLocalDate(minimumDate) : undefined;
 
-  const handleChange = (event: DateTimePickerEvent, date?: Date) => {
-    if (event.type === 'set' && date) {
-      onChange(toLocalIsoDate(date));
-    }
-  };
+  // `onValueChange`, not the deprecated `onChange` (which logs a warning in 9.x). It fires only
+  // when the user actually picks a date; dismissing the picker changes nothing.
+  const handleValueChange = (_event: unknown, date: Date) => onChange(toLocalIsoDate(date));
 
   const openAndroidPicker = () =>
     DateTimePickerAndroid.open({
       value: isoToLocalDate(value),
       mode: 'date',
       minimumDate: minimum,
-      onChange: handleChange,
+      onValueChange: handleValueChange,
     });
 
   return (
@@ -59,7 +54,7 @@ export default function DateField({ label, value, onChange, minimumDate, error }
             mode="date"
             display="compact"
             minimumDate={minimum}
-            onChange={handleChange}
+            onValueChange={handleValueChange}
             accessibilityLabel={accessibilityLabel}
             accentColor={colors.accent}
           />
