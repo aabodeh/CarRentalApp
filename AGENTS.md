@@ -295,3 +295,44 @@ empty one hid a real reduce-motion bug. Nothing would have caught it. The rule i
 explain why in the PR and let a human decide. `src/` now ignores inline ESLint config
 (`noInlineConfig`), and `npm run lint` fails on any warning (`--max-warnings 0`), so this is enforced.
 See `docs/ai-log/failures/FL-005 eslint disable written to silence a warning.md`.
+
+### Read the lockfile diff after every install
+
+An agent ran `npm install <pkg>@^x.y.z` to _declare_ a package that was already installed. The caret
+range made npm upgrade three navigation packages and drop five transitive ones. Every check still
+passed.
+
+**Instead:** after any install, run `git diff package-lock.json | grep '"version"'` and confirm that
+only what you meant to change moved. To declare something already installed, use the exact version.
+See `docs/ai-log/failures/FL-008 npm install changed more than declared.md`.
+
+### No inline style objects — lint does not check this
+
+An agent wrote `style={[styles.dot, { backgroundColor: … }]}` twice in one session, despite the rule
+under Styling. Nothing in `npm run check` catches it.
+
+**Instead:** put theme-dependent values in the component's `createStyles(colors)`, and read your diff
+for `style={[… {` before committing. A lint rule for this (`eslint-plugin-react-native`'s
+`no-inline-styles`) has been proposed for the team to decide on.
+See `docs/ai-log/failures/FL-009 inline style objects despite the rule.md`.
+
+### Animated styles that set the same key do not merge
+
+An agent applied `style={[entranceStyle, pressStyle]}`, where both set `transform`. The second
+replaced the first, so the cards stopped rising into place. Tests passed, because Jest doesn't run
+animations.
+
+**Instead:** when combining animated styles, check for shared keys. Put each `transform` on its own
+`Animated.View`, or build one `transform` array in one `useAnimatedStyle`.
+See `docs/ai-log/failures/FL-010 merged transforms cancelled the entrance animation.md`.
+
+### Check the installed version before using an API from memory
+
+This happened twice in two sessions: Reanimated's `sv.value =` (FL-006), and datetimepicker's
+`onChange`, which is deprecated in 9.x and logs a warning (FL-011). Both were idioms from older
+versions.
+
+**Instead:** before using a third-party API, open the installed package's `index.d.ts` or source,
+and check the signature and any deprecation notice. This is the general form of "Expo HAS CHANGED"
+at the top of this file.
+See `docs/ai-log/failures/FL-011 deprecated datetimepicker onChange from memory.md`.

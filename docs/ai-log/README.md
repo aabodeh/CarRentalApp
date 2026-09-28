@@ -25,7 +25,7 @@ before the deadline.
 
 ## Index — interactions
 
-Chronological. A-001 to A-007 are from 2026-09-22; A-008 and A-009 are from 2026-09-28.
+Chronological. A-001 to A-007 are from 2026-09-22; A-008 to A-010 are from 2026-09-28.
 
 | ID                                                  | Tool        | Mode    | Area | What                                                                                                             |
 | --------------------------------------------------- | ----------- | ------- | ---- | ---------------------------------------------------------------------------------------------------------------- |
@@ -38,18 +38,23 @@ Chronological. A-001 to A-007 are from 2026-09-22; A-008 and A-009 are from 2026
 | [[A-007 ai log backfill]]                           | Claude Code | agentic | docs | This chronological backfill ([PR #3](https://github.com/aabodeh/CarRentalApp/pull/3))                            |
 | [[A-008 domain types design system and dummy data]] | Claude Code | agentic | code | PR 1 foundation: types, tokens, a11y rules, dummy cars ([PR #4](https://github.com/aabodeh/CarRentalApp/pull/4)) |
 | [[A-009 car repository hook and list screen]]       | Claude Code | agentic | code | Car list: repository, hooks, motion, a11y ([PR #5](https://github.com/aabodeh/CarRentalApp/pull/5))              |
+| [[A-010 details booking flow and context]]          | Claude Code | agentic | code | Details, booking form, BookingContext (K3 seam) [[P7]]                                                           |
 
 ## Index — failures
 
-| ID                                                               | From         | What went wrong                                                                   | Caught by                            |
-| ---------------------------------------------------------------- | ------------ | --------------------------------------------------------------------------------- | ------------------------------------ |
-| [[FL-001 stale react native animated mock]]                      | A-003        | Mocked a React Native module path that does not exist in 0.86                     | The test suite failed to run         |
-| [[FL-002 wrong area for setup log entry]]                        | A-002, A-003 | Filed a tooling session under `area: structure`                                   | Plan review, before execution        |
-| [[FL-003 expo install dev flag puts packages in dependencies]]   | A-003        | Wrote a broken `npx expo install` flag into AGENTS.md as the team rule            | Manual reproduction during A-007     |
-| [[FL-004 font package root bundles every weight]]                | A-008        | Font package root import bundled all 12 weights (~1.2 MB) to use 3                | Reading the `expo export` asset list |
-| [[FL-005 eslint disable written to silence a warning]]           | A-009        | Wrote an `eslint-disable` to silence `exhaustive-deps` instead of fixing the deps | AI self-review; no tool would have   |
-| [[FL-006 reanimated value assignment rejected by compiler lint]] | A-009        | Used `sv.value =`, which the React Compiler lint rejects; needs `.get()`/`.set()` | Lint                                 |
-| [[FL-007 safe area jest mock used without default]]              | A-009        | Wired the safe-area Jest mock without `.default`, crashing App in tests           | The App smoke test                   |
+| ID                                                               | From         | What went wrong                                                                      | Caught by                                |
+| ---------------------------------------------------------------- | ------------ | ------------------------------------------------------------------------------------ | ---------------------------------------- |
+| [[FL-001 stale react native animated mock]]                      | A-003        | Mocked a React Native module path that does not exist in 0.86                        | The test suite failed to run             |
+| [[FL-002 wrong area for setup log entry]]                        | A-002, A-003 | Filed a tooling session under `area: structure`                                      | Plan review, before execution            |
+| [[FL-003 expo install dev flag puts packages in dependencies]]   | A-003        | Wrote a broken `npx expo install` flag into AGENTS.md as the team rule               | Manual reproduction during A-007         |
+| [[FL-004 font package root bundles every weight]]                | A-008        | Font package root import bundled all 12 weights (~1.2 MB) to use 3                   | Reading the `expo export` asset list     |
+| [[FL-005 eslint disable written to silence a warning]]           | A-009        | Wrote an `eslint-disable` to silence `exhaustive-deps` instead of fixing the deps    | AI self-review; no tool would have       |
+| [[FL-006 reanimated value assignment rejected by compiler lint]] | A-009        | Used `sv.value =`, which the React Compiler lint rejects; needs `.get()`/`.set()`    | Lint                                     |
+| [[FL-007 safe area jest mock used without default]]              | A-009        | Wired the safe-area Jest mock without `.default`, crashing App in tests              | The App smoke test                       |
+| [[FL-008 npm install changed more than declared]]                | A-010        | A caret-range install bumped 3 navigation packages and dropped 5 transitive ones     | Reading the npm output and lockfile diff |
+| [[FL-009 inline style objects despite the rule]]                 | A-010        | Wrote inline style objects twice, against AGENTS.md                                  | AI self-review; no lint rule             |
+| [[FL-010 merged transforms cancelled the entrance animation]]    | A-010        | Two animated `transform` styles in one array, so the press scale erased the entrance | AI self-review; tests were green         |
+| [[FL-011 deprecated datetimepicker onChange from memory]]        | A-010        | Used datetimepicker `onChange`, deprecated in v9 (dev warning)                       | Reading the library source               |
 
 Add more as they happen.
 
@@ -65,6 +70,7 @@ Long prompts live in `prompts/` and are wiki-linked from the entries that produc
 | [[P4]] — AI dossier backfill prompt | A-006          | A-007   |
 | [[P5]] — PR 1 foundation prompt     | pasted by Moha | A-008   |
 | [[P6]] — PR 2 car list prompt       | pasted by Moha | A-009   |
+| [[P7]] — PR 3 booking flow prompt   | pasted by Moha | A-010   |
 
 ## Reading this vault in Obsidian
 
