@@ -9,7 +9,7 @@ task: PR 3 — CarDetailsScreen with motion, BookingContext + bookingRepository 
 prompt_or_link: '[[P7]]'
 verification: TODO (Moha)
 decision: TODO (Moha)
-related_pr:
+related_pr: https://github.com/aabodeh/CarRentalApp/pull/6
 ---
 
 # A-010 — details, booking flow and context
