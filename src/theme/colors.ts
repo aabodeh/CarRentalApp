@@ -23,6 +23,11 @@ export type ColorTokens = {
   hairline: string;
   /** Borders of interactive controls (inputs, outlined buttons). ≥ 3:1, per WCAG 1.4.11. */
   borderStrong: string;
+  /**
+   * Fill for things that are not loaded yet: skeletons and the image area before the photo
+   * arrives. Decorative, so no contrast requirement.
+   */
+  placeholder: string;
   /** The one saturated colour. Primary actions and status only — use sparingly. */
   accent: string;
   /** Text and icons placed on an accent fill. */
@@ -41,6 +46,7 @@ export const lightColors: ColorTokens = {
   textMuted: '#5F5A51',
   hairline: '#E6E1D8',
   borderStrong: '#8C8579',
+  placeholder: '#ECE7DF',
   // Burnt signal orange. A brighter orange (#FF6A00) is only 2.7:1 on paper.
   accent: '#B4460A',
   onAccent: '#FFFFFF',
@@ -58,6 +64,7 @@ export const darkColors: ColorTokens = {
   textMuted: '#A9A398',
   hairline: '#2C2A26',
   borderStrong: '#7A746A',
+  placeholder: '#2A2925',
   // Brighter signal orange: the light-mode accent is only 3.4:1 on ink.
   accent: '#FF7A1A',
   onAccent: ink,

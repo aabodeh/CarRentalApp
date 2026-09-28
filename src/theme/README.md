@@ -19,7 +19,8 @@ corporate rental-app look.
   borders, not shadows. `elevation.raised` is the single exception, for floating bars.
 - **Space.** A 4pt scale. Be generous: when unsure, use the next step up.
 - **Motion.** Short and eased, and it always yields to reduce motion (`useReducedMotion`). See
-  `motion.ts`.
+  `motion.ts` for the durations, easings, `stagger`, `entrance`, `pressSpring` and `shimmer`.
+  `opacity.dimmed` only ever dims images, never text.
 
 **Goes here:** values used by more than one component. **Does not go here:** styles for a single
 component. Those live in that component's `StyleSheet.create` block.
