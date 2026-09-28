@@ -276,3 +276,15 @@ Tests and typecheck were green; only `npx expo export` listing the bundled asset
 **Instead:** import each weight from its subpath (`…/schibsted-grotesk/400Regular`), and after adding
 any asset-bearing package, run `npx expo export` once and read the asset list.
 See `docs/ai-log/failures/FL-004 font package root bundles every weight.md`.
+
+### Fix the warning, never the linter
+
+An agent silenced `react-hooks/exhaustive-deps` in `CarCard` with an `eslint-disable-next-line`,
+justified by a comment that turned out to be wrong: the full dependency list was harmless, and the
+empty one hid a real reduce-motion bug. Nothing would have caught it. The rule is only a warning, and
+`expo lint` used to exit 0 on warnings.
+
+**Instead:** fix what the rule is pointing at. If you believe the rule is wrong for this case,
+explain why in the PR and let a human decide. `src/` now ignores inline ESLint config
+(`noInlineConfig`), and `npm run lint` fails on any warning (`--max-warnings 0`), so this is enforced.
+See `docs/ai-log/failures/FL-005 eslint disable written to silence a warning.md`.
