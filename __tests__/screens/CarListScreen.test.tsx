@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react-native';
+import { act, fireEvent, render, screen } from '@testing-library/react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 import { carAccessibilityLabel } from '../../src/components/CarCard';
@@ -23,7 +23,18 @@ const tesla = cars.find((car) => car.id === 'car-05')!;
 const unavailableCar = cars.find((car) => !car.available)!;
 
 describe('CarListScreen', () => {
+  // FlatList renders further rows on a timer. With real timers that timer could fire after a test
+  // had finished, outside act(), and log an intermittent act() warning. Fake timers let each test
+  // flush it deliberately, inside act(), before the next test starts.
+  beforeEach(() => {
+    jest.useFakeTimers();
+  });
+
   afterEach(() => {
+    act(() => {
+      jest.runOnlyPendingTimers();
+    });
+    jest.useRealTimers();
     jest.restoreAllMocks();
   });
 
