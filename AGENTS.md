@@ -186,6 +186,9 @@ Rules:
   by explicit amounts (`jest.advanceTimersByTimeAsync(SIMULATED_LATENCY_MS)`), inside `act` when
   anything is rendered. Never `runAllTimers`: the loading skeleton pulses forever, so "run every
   timer" never finishes.
+- **Lists in tests.** `FlatList` renders more rows on a timer. A test that renders one uses fake
+  timers and calls `act(() => jest.runOnlyPendingTimers())` in `afterEach`. Otherwise the timer can
+  fire after the test and log an intermittent `act()` warning (FL-012).
 - **Screens that need a provider or navigator context get it in the test.** For example, wrap the
   screen in `BookingProvider repository={createInMemoryBookingRepository()}` and a
   `HeaderHeightContext.Provider`, instead of mocking the hooks.

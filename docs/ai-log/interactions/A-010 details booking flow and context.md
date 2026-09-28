@@ -104,6 +104,10 @@ It asked to start in plan mode and wait for approval.
   - `runAllTimersAsync` looped forever on the skeleton's infinite pulse. It was replaced by explicit
     waits, and AGENTS.md now says so.
   - One test advanced time outside `act`, which printed an act warning. Fixed.
+- [[FL-012 flaky flatlist act warning shipped in tests]]: the final pre-PR run printed a
+  `console.error`. The AI traced it to the `CarListScreen` tests from PR #5, which were already on
+  `main`, and reproduced it in 3 of 6 runs. It fixed it with fake timers flushed inside `act`, after
+  which 8 of 8 runs were silent. The earlier claim of "no console output" was based on lucky runs.
 - **One test caught a real bug:** the repository stamped `createdAt` _after_ the simulated wait. It
   now records the submit moment.
 - **A `TextField` test design question:** the visible label is deliberately hidden from screen
@@ -116,8 +120,8 @@ It asked to start in plan mode and wait for approval.
 
 **Verification the AI ran (AI verification, not human):**
 
-- `npm run check` passed: lint with 0 warnings, prettier, `tsc`, 208/208 tests, and no console
-  output.
+- `npm run check` passed: lint with 0 warnings, prettier, `tsc`, 208/208 tests. The final pre-PR run then printed an intermittent
+  `act()` warning (FL-012, above). After the fix, 8 of 8 full runs printed no console output.
 - `expo-doctor` passed 21/21.
 - `npx expo start` served the iOS and Android bundles with HTTP 200 and no Metro warnings.
 - `expo export`: 3 font files and a 3 MB bundle, unchanged.
