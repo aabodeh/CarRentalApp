@@ -8,11 +8,14 @@ import App from '../App';
  *
  * Its job is to keep CI green and meaningful from day one, and to fail loudly
  * if someone breaks navigation wiring while doing something unrelated.
+ *
+ * `findByText`, not `getByText`: App renders nothing until the fonts have loaded,
+ * and font loading is asynchronous.
  */
 describe('App', () => {
-  it('renders the car list as the initial screen', () => {
+  it('renders the car list as the initial screen', async () => {
     render(<App />);
 
-    expect(screen.getByText('Car List')).toBeTruthy();
+    expect(await screen.findByText('Car List')).toBeTruthy();
   });
 });
