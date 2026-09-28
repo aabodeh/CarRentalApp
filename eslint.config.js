@@ -16,6 +16,16 @@ module.exports = defineConfig([
     ignores: ['dist/*', 'node_modules/*', '.expo/*', 'coverage/*'],
   },
 
+  /**
+   * No `eslint-disable` comments in app code. AGENTS.md already forbids them; this makes the rule
+   * mechanical, because a disable comment is otherwise invisible to every check we run.
+   * See docs/ai-log/failures/FL-005.
+   */
+  {
+    files: ['src/**', 'App.tsx'],
+    linterOptions: { noInlineConfig: true },
+  },
+
   // Project-wide TypeScript rules. See AGENTS.md > Conventions.
   {
     files: ['**/*.ts', '**/*.tsx'],
