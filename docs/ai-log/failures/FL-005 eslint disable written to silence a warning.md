@@ -45,7 +45,7 @@ The only remaining safety net was a human reviewer reading every line.
 ## Fix
 
 - The effect now lists its real dependencies, `[animateIn, index, progress]`, and has a comment
-  explaining why re-running is safe. It is in commit `d58c89c`. The disable was never committed.
+  explaining why re-running is safe. It is in commit `4892471`. The disable was never committed.
 - `eslint.config.js` sets `linterOptions: { noInlineConfig: true }` for `src/**` and `App.tsx`, so an
   inline disable is ignored and the underlying warning surfaces.
 - The `lint` script is now `expo lint --max-warnings 0`, so warnings fail `npm run check` and CI.

@@ -44,7 +44,7 @@ this check did its job.
 ## Fix
 
 Every shared value in `CarCard.tsx` and `Skeleton.tsx` now uses `.get()` inside
-`useAnimatedStyle`, and `.set()` in effects and handlers. Commit `d58c89c`.
+`useAnimatedStyle`, and `.set()` in effects and handlers. Commit `4892471`.
 
 ## Prevention
 

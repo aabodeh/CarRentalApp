@@ -57,8 +57,8 @@ import { SchibstedGrotesk_700Bold } from '@expo-google-fonts/schibsted-grotesk/7
 
 Re-running `npx expo export` showed exactly three `.ttf` files of 101 KB each. `App.tsx` now takes
 `useFonts` from `expo-font` directly instead of through the font package's root re-export, so
-nothing imports the root any more. The fix is in the same PR, commit `dad51b1`
-(`feat(theme): …`).
+nothing imports the root any more. The fix is in the same PR, commit `dad51b1` on the PR #4 branch, which was
+squash-merged into `main` as `a343582`.
 
 ## Prevention
 

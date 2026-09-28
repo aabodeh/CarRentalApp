@@ -49,7 +49,7 @@ jest.mock(
 ```
 
 The mock is used only in `__tests__/App.test.tsx`, the one suite that renders the provider. It is
-not in the global `jest.setup.js`, because only that suite needs it. Commit `6f6e3ee`.
+not in the global `jest.setup.js`, because only that suite needs it. Commit `7373f3d`.
 
 ## Prevention
 
