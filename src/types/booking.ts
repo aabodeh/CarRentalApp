@@ -11,6 +11,12 @@ export type SyncStatus = 'pending' | 'failed' | 'completed';
 export type Booking = {
   id: string;
   carId: string;
+  /**
+   * Who is renting. Plain fields rather than a Renter entity: there is no authentication in
+   * scope, so a renter has no identity beyond what they type into the booking form.
+   */
+  renterName: string;
+  renterEmail: string;
   /** ISO date `YYYY-MM-DD`. A string, not a Date, so it survives JSON round-trips. */
   startDate: string;
   /** ISO date `YYYY-MM-DD`. */

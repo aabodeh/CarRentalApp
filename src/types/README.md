@@ -6,7 +6,8 @@ They mirror the class diagram in our design document, so the code and the report
 **Change the diagram first, then mirror it here.** Do not invent a field in code.
 
 - `car.ts`: `Car`, `Transmission`, `Fuel`.
-- `booking.ts`: `Booking`, `SyncStatus`. `syncStatus` is local state that the repository sets
+- `booking.ts`: `Booking`, `SyncStatus`. The renter is two plain fields (`renterName`,
+  `renterEmail`), not an entity, because there is no auth in scope. `syncStatus` is local state that the repository sets
   (K3). The server never sends it.
 - Dates are strings: `YYYY-MM-DD` for booking days, full ISO-8601 for `createdAt`. A `Date`
   object does not survive a JSON round-trip through storage or the API.
