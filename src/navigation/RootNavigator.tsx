@@ -13,7 +13,9 @@ export default function RootNavigator() {
       <Stack.Screen
         name="CarList"
         component={CarListScreen}
-        options={{ title: 'Available Cars' }}
+        // The list draws its own editorial title; the other screens keep the native header
+        // for the back button.
+        options={{ title: 'Cars', headerShown: false }}
       />
       <Stack.Screen
         name="CarDetails"
