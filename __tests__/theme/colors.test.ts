@@ -42,6 +42,8 @@ function pairsFor(c: ColorTokens): Pair[] {
     );
   }
   pairs.push(['onAccent on accent', c.onAccent, c.accent, AA_TEXT]);
+  // The My bookings tab badge: a count on the failed-status colour.
+  pairs.push(['surface on status.failed (tab badge)', c.surface, c.status.failed, AA_TEXT]);
   return pairs;
 }
 

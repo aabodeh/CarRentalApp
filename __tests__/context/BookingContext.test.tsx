@@ -34,9 +34,10 @@ describe('BookingContext', () => {
     jest.useFakeTimers({ now: new Date(2026, 8, 28, 10, 0) });
   });
 
-  afterEach(() => {
-    act(() => {
-      jest.runOnlyPendingTimers();
+  afterEach(async () => {
+    // Async flush: a pending retry timer starts an async send, which must finish inside act.
+    await act(async () => {
+      await jest.runOnlyPendingTimersAsync();
     });
     jest.useRealTimers();
     jest.restoreAllMocks();

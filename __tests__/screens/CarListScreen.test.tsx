@@ -1,15 +1,14 @@
 import { act, fireEvent, render, screen } from '@testing-library/react-native';
-import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 import { carAccessibilityLabel } from '../../src/components/CarCard';
 import { cars } from '../../src/data/dummy/cars';
-import type { RootStackParamList } from '../../src/navigation/types';
+import type { CarsStackScreenProps } from '../../src/navigation/types';
 import CarListScreen from '../../src/screens/CarListScreen';
 import { OFFLINE_TITLE } from '../../src/components/OfflineBanner';
 import { stubCarRepository } from '../helpers/carRepositoryStub';
 import { setOffline, setOnline } from '../helpers/network';
 
-type Props = NativeStackScreenProps<RootStackParamList, 'CarList'>;
+type Props = CarsStackScreenProps<'CarList'>;
 
 function renderScreen() {
   const navigate = jest.fn();

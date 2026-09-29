@@ -56,3 +56,6 @@ export const hero = { zoom: 1.06 } as const;
 
 /** The header title fades in over this many points of scroll, once the car's name has scrolled away. */
 export const headerTitleFade = { distance: 24 } as const;
+
+/** The "booking confirmed" toast (K3): how long it stays before hiding itself. */
+export const toast = { visibleMs: 4_000 } as const;

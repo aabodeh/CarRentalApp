@@ -3,6 +3,7 @@ import { useFonts } from 'expo-font';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
+import SyncToast from './src/components/SyncToast';
 import { BookingProvider } from './src/context/BookingContext';
 import RootNavigator from './src/navigation/RootNavigator';
 import { fontAssets } from './src/theme';
@@ -23,6 +24,7 @@ export default function App() {
           <RootNavigator />
           <StatusBar style="auto" />
         </NavigationContainer>
+        <SyncToast />
       </BookingProvider>
     </SafeAreaProvider>
   );
