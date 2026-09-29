@@ -9,6 +9,13 @@ Small, pure, framework-free helpers. No React, no I/O, and trivial to unit test.
 - `formatPrice`: DKK in `da-DK` format (`1.195 kr.`), with a non-breaking space.
 - `formatDateRange`: `1.–3. okt. 2026`, collapsing whatever the two dates share.
 
+- `localDate`: the user's wall-clock side of dates. `todayIsoDate()`, `addDays`, and conversions
+  to and from the native picker's local `Date`.
+- `validateBooking`: every booking-form problem at once, with `today` injected. It has two
+  callers, the form and `bookingRepository`.
+- `carLabels`: display words for transmission and fuel, and the "not available" copy.
+- `toError`: normalises anything thrown into an `Error`.
+
 The date helpers **throw a `RangeError`** on malformed dates or a range that ends before it starts.
 The UI validates input first; these functions are the last line of defence, not the validator.
 

@@ -11,3 +11,14 @@ repository. Context is for sharing state, not for getting it.
 
 Prefer local `useState` first. Only promote state to context when a second
 screen actually needs it.
+
+## Today
+
+- `BookingContext.tsx`: `BookingProvider` (mounted in `App.tsx`) and `useBookings()`, which gives
+  `{ bookings, creation, createBooking }`.
+  - The state transitions are a pure `bookingReducer`, unit-tested without rendering.
+  - `createBooking` saves a pending booking through `bookingRepository`, then syncs it in the
+    background. A booking whose sync fails is marked `failed`, not dropped.
+  - A second `createBooking` while one is in flight returns the same promise. The guard is a ref,
+    not state, because two taps in the same frame both still see `idle` in state.
+  - The provider takes an optional `repository` prop for tests.

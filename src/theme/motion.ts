@@ -47,3 +47,12 @@ export const pressSpring = { damping: 20, stiffness: 300, mass: 1 } as const;
 
 /** Skeleton pulse: opacity swings between 1 and `minOpacity` every `duration` ms, then back. */
 export const shimmer = { duration: 900, minOpacity: 0.4 } as const;
+
+/**
+ * Details hero. Pulling down stretches it (it keeps covering the gap); scrolling away zooms it
+ * in by up to `zoom`. Both are skipped with reduce motion on.
+ */
+export const hero = { zoom: 1.06 } as const;
+
+/** The header title fades in over this many points of scroll, once the car's name has scrolled away. */
+export const headerTitleFade = { distance: 24 } as const;

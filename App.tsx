@@ -3,6 +3,7 @@ import { useFonts } from 'expo-font';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
+import { BookingProvider } from './src/context/BookingContext';
 import RootNavigator from './src/navigation/RootNavigator';
 import { fontAssets } from './src/theme';
 
@@ -17,10 +18,12 @@ export default function App() {
 
   return (
     <SafeAreaProvider>
-      <NavigationContainer>
-        <RootNavigator />
-        <StatusBar style="auto" />
-      </NavigationContainer>
+      <BookingProvider>
+        <NavigationContainer>
+          <RootNavigator />
+          <StatusBar style="auto" />
+        </NavigationContainer>
+      </BookingProvider>
     </SafeAreaProvider>
   );
 }

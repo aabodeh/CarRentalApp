@@ -1,32 +1,24 @@
 import * as Haptics from 'expo-haptics';
 import { Image } from 'expo-image';
-import { useEffect, useMemo } from 'react';
+import { useMemo } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import Animated, {
-  Easing,
-  useAnimatedStyle,
-  useSharedValue,
-  withDelay,
-  withSpring,
-  withTiming,
-} from 'react-native-reanimated';
+import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 
+import { useEntrance } from '../hooks/useEntrance';
 import { useReducedMotion } from '../hooks/useReducedMotion';
 import { useTheme } from '../hooks/useTheme';
 import {
   durations,
-  easings,
-  entrance,
   opacity,
   pressScale,
   pressSpring,
   radii,
   spacing,
-  stagger,
   typography,
   type ColorTokens,
 } from '../theme';
 import type { Car } from '../types';
+import { FUEL_LABEL, TRANSMISSION_LABEL, UNAVAILABLE_TEXT } from '../utils/carLabels';
 import { formatPrice } from '../utils/formatPrice';
 
 export type CarCardProps = {
@@ -34,20 +26,6 @@ export type CarCardProps = {
   /** Position in the list. Drives the staggered entrance. */
   index: number;
   onPress: (carId: string) => void;
-};
-
-const UNAVAILABLE_TEXT = 'Not available right now';
-
-const TRANSMISSION_LABEL: Record<Car['transmission'], string> = {
-  manual: 'Manual',
-  automatic: 'Automatic',
-};
-
-const FUEL_LABEL: Record<Car['fuel'], string> = {
-  petrol: 'Petrol',
-  diesel: 'Diesel',
-  electric: 'Electric',
-  hybrid: 'Hybrid',
 };
 
 /**
@@ -73,30 +51,9 @@ export default function CarCard({ car, index, onPress }: CarCardProps) {
   const styles = useMemo(() => createStyles(colors), [colors]);
   const reduceMotion = useReducedMotion();
 
-  // Only the first wave of cards makes an entrance; see `stagger` in src/theme/motion.ts.
-  const animateIn = !reduceMotion && index < stagger.maxItems;
-  const progress = useSharedValue(animateIn ? 0 : 1);
+  const entranceStyle = useEntrance(index);
   const scale = useSharedValue(1);
-
-  useEffect(() => {
-    if (!animateIn) {
-      progress.set(1);
-      return;
-    }
-    progress.set(
-      withDelay(
-        index * stagger.step,
-        withTiming(1, { duration: durations.slow, easing: Easing.bezier(...easings.enter) })
-      )
-    );
-    // Re-running is harmless: animating to 1 from 1 does nothing. And if the reduce-motion answer
-    // arrives after mount, the `!animateIn` branch snaps the card into place.
-  }, [animateIn, index, progress]);
-
-  const animatedStyle = useAnimatedStyle(() => ({
-    opacity: progress.get(),
-    transform: [{ translateY: (1 - progress.get()) * entrance.distance }, { scale: scale.get() }],
-  }));
+  const pressStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.get() }] }));
 
   const handlePressIn = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -115,48 +72,52 @@ export default function CarCard({ car, index, onPress }: CarCardProps) {
   ];
 
   return (
-    <Animated.View style={animatedStyle}>
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel={carAccessibilityLabel(car)}
-        accessibilityState={{ disabled: !car.available }}
-        disabled={!car.available}
-        onPress={() => onPress(car.id)}
-        onPressIn={handlePressIn}
-        onPressOut={handlePressOut}
-        style={styles.card}
-      >
-        <Image
-          source={{ uri: car.imageUrl }}
-          style={[styles.image, !car.available && styles.imageUnavailable]}
-          contentFit="cover"
-          transition={reduceMotion ? 0 : durations.base}
-          accessible={false}
-        />
-        <View style={styles.body}>
-          <Text style={styles.location}>{car.location}</Text>
-          <Text style={[styles.name, !car.available && styles.nameUnavailable]}>
-            {car.make} {car.model}
-          </Text>
-          <View style={styles.metadata}>
-            {metadata.map((item) => (
-              <Text key={item} style={styles.metadataItem}>
-                {item}
-              </Text>
-            ))}
+    // Two views, because both styles set `transform`: in one style array the second would
+    // replace the first, and the press scale would silently cancel the entrance rise.
+    <Animated.View style={entranceStyle}>
+      <Animated.View style={pressStyle}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={carAccessibilityLabel(car)}
+          accessibilityState={{ disabled: !car.available }}
+          disabled={!car.available}
+          onPress={() => onPress(car.id)}
+          onPressIn={handlePressIn}
+          onPressOut={handlePressOut}
+          style={styles.card}
+        >
+          <Image
+            source={{ uri: car.imageUrl }}
+            style={[styles.image, !car.available && styles.imageUnavailable]}
+            contentFit="cover"
+            transition={reduceMotion ? 0 : durations.base}
+            accessible={false}
+          />
+          <View style={styles.body}>
+            <Text style={styles.location}>{car.location}</Text>
+            <Text style={[styles.name, !car.available && styles.nameUnavailable]}>
+              {car.make} {car.model}
+            </Text>
+            <View style={styles.metadata}>
+              {metadata.map((item) => (
+                <Text key={item} style={styles.metadataItem}>
+                  {item}
+                </Text>
+              ))}
+            </View>
+            <View style={styles.footer}>
+              {car.available ? (
+                <Text style={styles.price}>
+                  {formatPrice(car.pricePerDay)}
+                  <Text style={styles.perDay}> / day</Text>
+                </Text>
+              ) : (
+                <Text style={styles.unavailable}>{UNAVAILABLE_TEXT}</Text>
+              )}
+            </View>
           </View>
-          <View style={styles.footer}>
-            {car.available ? (
-              <Text style={styles.price}>
-                {formatPrice(car.pricePerDay)}
-                <Text style={styles.perDay}> / day</Text>
-              </Text>
-            ) : (
-              <Text style={styles.unavailable}>{UNAVAILABLE_TEXT}</Text>
-            )}
-          </View>
-        </View>
-      </Pressable>
+        </Pressable>
+      </Animated.View>
     </Animated.View>
   );
 }
