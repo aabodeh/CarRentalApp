@@ -121,6 +121,14 @@ It asked to start in plan mode and wait for approval.
   explaining why.
 - The guards were written alongside their tests, not strictly test-first.
 
+**After the PR was opened.** Moha created the MockAPI project by following the AI's step-by-step
+instructions and sent the URL. Before wiring it in, the AI fetched `/cars` and ran the reply
+through the app's own `isCarArray` guard, which rejected all 10 cars: they had no `id`. The seed
+had been generated without ids, on the unverified belief that MockAPI adds them. It doesn't (see
+[[FL-015 assumed mockapi adds ids to seed]]). The seed now carries ids `"1"`–`"10"`, the seed test
+also checks it against the guard, and `apiBaseUrl` is set. The docs now mark whether MockAPI
+generates ids on POST as unverified.
+
 **Verification the AI ran (AI verification, not human):**
 
 - `npm run check` **5 of 5** times: lint with 0 warnings, prettier, `tsc`, and 299/299 tests with
@@ -131,8 +139,8 @@ It asked to start in plan mode and wait for approval.
 - Mutation checks on the inline-style rule (three forms), the console guard (a planted warning,
   and an opt-in) and the seed drift test.
 
-**Not verified by anyone yet:** the real API. **There is no MockAPI URL yet**, so no request has
-ever reached a server. That covers the whole device checklist in the PR, including airplane-mode
+**Not verified by anyone yet:** the app against the real API. The URL is set, but the seed has to
+be re-pasted with ids before `/cars` passes validation, and no device has run against it. That covers the whole device checklist in the PR, including airplane-mode
 behaviour, the banner's feel, data-age labels over time, booking offline and then reconnecting,
 and relaunching with a cache.
 
