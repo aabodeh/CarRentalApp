@@ -69,11 +69,29 @@ and not inside it. A hook ignores any answer that arrives after it unmounts. See
 
 The NFRs land in specific places:
 
-| NFR              | Where it lives                                                                       |
-| ---------------- | ------------------------------------------------------------------------------------ |
-| K1 offline reads | repository reads `storage/` cache first, refreshes from `services/api/`, writes back |
-| K2 retry queue   | failed writes go to a queue in `storage/`; the repository owns the backoff           |
-| K3 sync status   | the repository knows the status; a hook exposes it; a component renders it           |
+| NFR              | Where it lives today                                                                                                                                                                | Status |
+| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
+| K1 offline reads | `carRepository` serves `storage/carCache` first, refreshes from `services/api/`, writes back. `useCars` refreshes when the connection returns. `OfflineBanner` + `DataAge` show it. | PR 4   |
+| K2 retry queue   | `bookingRepository.syncBooking` leaves unreachable bookings `pending`. The queue with backoff goes in `storage/` under the reserved key `carrental.v1.sync-queue`.                  | PR 5   |
+| K3 sync status   | `bookingRepository` sets `syncStatus`, `BookingContext` holds it, `SyncStatusBadge` renders it.                                                                                     | PR 3–4 |
+
+**Cache, then refresh.** Every read the user can see offline goes through a repository that:
+
+1. serves the cached copy immediately, if there is one
+2. asks the API in the background and, on success, updates both the cache and the UI
+3. on failure _with_ a cache, keeps serving the cache and marks it `stale`
+4. on failure _without_ a cache, reports the error
+
+A hook never waits for the network when a cached answer exists.
+
+**Storage keys** are `carrental.v<STORAGE_VERSION>.<name>` and hold `{ version, savedAt, data }`.
+Only `src/storage/keyValueStore.ts` touches AsyncStorage. Stored data is always read through a
+guard from `src/types/guards.ts`, and anything corrupt or outdated reads as "nothing stored". If
+you change a stored shape, bump `STORAGE_VERSION`. The keys in use are listed in
+`src/storage/README.md`.
+
+**API replies are untrusted.** Every response is validated by a guard before it becomes a domain
+object. A malformed reply is an `ApiPayloadError`, never a crash later on.
 
 ## Folder structure
 

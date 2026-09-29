@@ -7,10 +7,17 @@ Custom React hooks (`useX`) that connect the UI to repositories and context.
 - `useTheme`: the colour tokens for the current light/dark scheme.
 - `useReducedMotion`: true when the OS asks for reduced motion. Every animation must honour it.
 - `useCars`: the car list as `loading | error | empty | ready`, plus `refresh`/`isRefreshing`.
+  `ready` and `empty` carry `fetchedAt` and `freshness`. It refreshes by itself when the
+  connection comes back.
 - `useEntrance(index)`: the staggered fade-and-rise for list cards and details sections. It is
   gated on reduce motion.
-- `useCar(id)`: one car as `loading | not-found | error | ready`. `not-found` is separate from
+- `useCar(id)`: one car as `loading | not-found | error | ready`, read from the same cached list
+  as `useCars`, so details and list always agree. `not-found` is separate from
   `error` because retrying can't make a missing car appear.
+
+- `useNetworkStatus`: `{ isOffline }` from expo-network's OS events. An unknown state counts as
+  online.
+- `useNow(ms)`: the current time, ticking, for "Updated 5 minutes ago".
 
 **Goes here later:** `useBooking`, `useSyncStatus` — hooks that own
 loading/error/data state and call a repository.

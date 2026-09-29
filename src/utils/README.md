@@ -14,6 +14,7 @@ Small, pure, framework-free helpers. No React, no I/O, and trivial to unit test.
 - `validateBooking`: every booking-form problem at once, with `today` injected. It has two
   callers, the form and `bookingRepository`.
 - `carLabels`: display words for transmission and fuel, and the "not available" copy.
+- `formatRelativeTime`: "just now", "5 minutes ago", "yesterday".
 - `toError`: normalises anything thrown into an `Error`.
 
 The date helpers **throw a `RangeError`** on malformed dates or a range that ends before it starts.
