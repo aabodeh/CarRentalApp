@@ -23,7 +23,7 @@
     },
     "plugins": ["expo-image", "expo-font", "@react-native-community/datetimepicker"],
     "extra": {
-      "apiBaseUrl": ""
+      "apiBaseUrl": "https://6abbe6e3b2118ed7abb96da5.mockapi.io/api/v1"
     }
   }
 }
