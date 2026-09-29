@@ -65,6 +65,10 @@
       "src/**/*.{ts,tsx}",
       "App.tsx",
       "!**/*.d.ts"
+    ],
+    "testPathIgnorePatterns": [
+      "/node_modules/",
+      "<rootDir>/__tests__/helpers/"
     ]
   },
   "engines": {

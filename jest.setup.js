@@ -28,8 +28,23 @@ require('react-native-reanimated').setUpTests();
  * https://react-native-async-storage.github.io/async-storage/docs/advanced/jest
  */
 jest.mock('@react-native-async-storage/async-storage', () =>
-  require('@react-native-async-storage/async-storage/jest/async-storage-mock'),
+  require('@react-native-async-storage/async-storage/jest/async-storage-mock')
 );
+
+/**
+ * expo-network's `useNetworkState` does not work under Jest: it updates state asynchronously
+ * (an act() warning) and its cleanup calls `listener.remove()`, which jest-expo's generic native
+ * mock does not provide, so unmounting crashes. Every screen reads the network status, so the
+ * default here is "online". A test that needs offline switches it:
+ *
+ *     jest.mocked(useNetworkState).mockReturnValue({ isConnected: false, isInternetReachable: false });
+ *
+ * (see __tests__/helpers/network.ts)
+ */
+jest.mock('expo-network', () => ({
+  ...jest.requireActual('expo-network'),
+  useNetworkState: jest.fn(() => ({ isConnected: true, isInternetReachable: true })),
+}));
 
 /**
  * Any console.error or console.warn fails the test that produced it.
