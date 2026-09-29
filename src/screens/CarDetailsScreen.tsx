@@ -35,6 +35,8 @@ export default function CarDetailsScreen({ route, navigation }: Props) {
   return (
     <CarDetails
       car={state.car}
+      fetchedAt={state.fetchedAt}
+      freshness={state.freshness}
       scrollY={scrollY}
       titleThreshold={titleThreshold}
       onBook={() => navigation.navigate('Booking', { carId })}

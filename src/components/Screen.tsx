@@ -4,6 +4,7 @@ import { SafeAreaView, type Edge } from 'react-native-safe-area-context';
 
 import { useTheme } from '../hooks/useTheme';
 import type { ColorTokens } from '../theme';
+import OfflineBanner from './OfflineBanner';
 
 export type ScreenProps = {
   children: ReactNode;
@@ -16,13 +17,14 @@ export type ScreenProps = {
 
 const SIDE_EDGES: Edge[] = ['left', 'right'];
 
-/** Root wrapper for every screen: safe-area padding on our background colour. */
+/** Root wrapper for every screen: safe-area padding, our background, and the offline banner. */
 export default function Screen({ children, edges = SIDE_EDGES }: ScreenProps) {
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
 
   return (
     <SafeAreaView style={styles.screen} edges={edges}>
+      <OfflineBanner />
       {children}
     </SafeAreaView>
   );

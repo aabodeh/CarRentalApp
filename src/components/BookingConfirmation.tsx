@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
+import { useNetworkStatus } from '../hooks/useNetworkStatus';
 import { useTheme } from '../hooks/useTheme';
 import { spacing, typography, type ColorTokens } from '../theme';
 import type { Booking, Car } from '../types';
@@ -17,15 +18,23 @@ export type BookingConfirmationProps = {
 };
 
 const STATUS_MESSAGE: Record<Booking['syncStatus'], string> = {
-  pending: 'Your booking is saved on this phone. We’re confirming it now.',
-  failed: 'Your booking is saved on this phone, but we couldn’t confirm it yet.',
+  pending: 'Saved on this phone. We’re confirming it now.',
+  failed: 'Saved on this phone, but our server didn’t accept it.',
   completed: 'Your booking is confirmed.',
 };
+
+/** Offline, a pending booking waits for the connection — say so rather than "confirming now". */
+const PENDING_OFFLINE_MESSAGE = 'Saved on this phone. It will sync when you’re back online.';
 
 /** Shown after a booking is created. The status badge updates live as the booking syncs (K3). */
 export default function BookingConfirmation({ car, booking, onDone }: BookingConfirmationProps) {
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
+  const { isOffline } = useNetworkStatus();
+  const message =
+    booking.syncStatus === 'pending' && isOffline
+      ? PENDING_OFFLINE_MESSAGE
+      : STATUS_MESSAGE[booking.syncStatus];
 
   return (
     <View style={styles.container}>
@@ -34,7 +43,7 @@ export default function BookingConfirmation({ car, booking, onDone }: BookingCon
           Booking received
         </Text>
         <SyncStatusBadge status={booking.syncStatus} />
-        <Text style={styles.message}>{STATUS_MESSAGE[booking.syncStatus]}</Text>
+        <Text style={styles.message}>{message}</Text>
       </View>
       <SpecGrid
         specs={[

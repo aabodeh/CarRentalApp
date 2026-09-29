@@ -3,6 +3,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import Animated, { useAnimatedScrollHandler, type SharedValue } from 'react-native-reanimated';
 
 import { useTheme } from '../hooks/useTheme';
+import type { Freshness } from '../repositories/carRepository';
 import { spacing, typography, type ColorTokens } from '../theme';
 import type { Car } from '../types';
 import { FUEL_LABEL, TRANSMISSION_LABEL, UNAVAILABLE_TEXT } from '../utils/carLabels';
@@ -10,11 +11,16 @@ import { formatPrice } from '../utils/formatPrice';
 import AnimatedSection from './AnimatedSection';
 import BottomActionBar from './BottomActionBar';
 import CarHero from './CarHero';
+import DataAge from './DataAge';
+import OfflineBanner from './OfflineBanner';
 import PrimaryButton from './PrimaryButton';
 import SpecGrid from './SpecGrid';
 
 export type CarDetailsProps = {
   car: Car;
+  /** When this car's data was fetched, and whether it is a saved copy (K1). */
+  fetchedAt: string;
+  freshness: Freshness;
   onBook: () => void;
   /** Written on every scroll frame; the screen's header title reads it. */
   scrollY: SharedValue<number>;
@@ -23,7 +29,14 @@ export type CarDetailsProps = {
 };
 
 /** The details of one car: hero, name, price, specs, and a pinned "Book this car" bar. */
-export default function CarDetails({ car, onBook, scrollY, titleThreshold }: CarDetailsProps) {
+export default function CarDetails({
+  car,
+  fetchedAt,
+  freshness,
+  onBook,
+  scrollY,
+  titleThreshold,
+}: CarDetailsProps) {
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const [barHeight, setBarHeight] = useState(0);
@@ -46,6 +59,7 @@ export default function CarDetails({ car, onBook, scrollY, titleThreshold }: Car
 
   return (
     <View style={styles.container}>
+      <OfflineBanner />
       <Animated.ScrollView onScroll={onScroll} scrollEventThrottle={16}>
         <CarHero imageUrl={car.imageUrl} scrollY={scrollY} />
         <AnimatedSection
@@ -75,6 +89,8 @@ export default function CarDetails({ car, onBook, scrollY, titleThreshold }: Car
           <Text style={car.available ? styles.available : styles.unavailable}>
             {car.available ? 'Available to book' : UNAVAILABLE_TEXT}
           </Text>
+          {/* Only worth saying when this is not fresh from the server. */}
+          {freshness === 'fresh' ? null : <DataAge fetchedAt={fetchedAt} freshness={freshness} />}
         </AnimatedSection>
         <AnimatedSection index={2} style={styles.section}>
           <SpecGrid specs={specs} />
