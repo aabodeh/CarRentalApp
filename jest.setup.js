@@ -22,6 +22,16 @@ jest.mock('react-native-worklets', () => require('react-native-worklets/src/mock
 require('react-native-reanimated').setUpTests();
 
 /**
+ * AsyncStorage's native module does not exist under Jest ("NativeModule: AsyncStorage is null").
+ * The library ships an in-memory mock for exactly this; every suite that reaches a repository
+ * imports storage, so it is global. Tests reset it with `AsyncStorage.clear()`.
+ * https://react-native-async-storage.github.io/async-storage/docs/advanced/jest
+ */
+jest.mock('@react-native-async-storage/async-storage', () =>
+  require('@react-native-async-storage/async-storage/jest/async-storage-mock'),
+);
+
+/**
  * Any console.error or console.warn fails the test that produced it.
  *
  * Why: warnings passed silently before — an act() warning (FL-012) and a deprecation warning
