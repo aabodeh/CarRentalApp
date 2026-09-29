@@ -31,6 +31,9 @@ above it gets the data from a hook and passes it down.
 - `BottomActionBar`: pinned bottom bar. It clears the home indicator (additive SafeAreaView) and
   reports its height so the content can pad by it.
 - `CarDetails`, `CarHero`, `AnimatedSection`, `FadingHeaderTitle`: the details screen's pieces.
+- `OfflineBanner`: a quiet notice of what still works offline. It's rendered by `Screen` and
+  `CarDetails`, so it appears on every screen.
+- `DataAge`: "Updated 5 minutes ago" / "Saved copy · updated 2 hours ago".
 - `CarStateView`: the loading / not-found / error view for any screen that loads one car.
 - `BookingForm` / `BookingConfirmation`: the booking screen's two states.
 

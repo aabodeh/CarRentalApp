@@ -34,7 +34,13 @@ export default function CarListScreen({ navigation }: Props) {
         data={cars ?? []}
         keyExtractor={(car) => car.id}
         renderItem={({ item, index }) => <CarCard car={item} index={index} onPress={openCar} />}
-        ListHeaderComponent={<CarListHeader cars={cars} />}
+        ListHeaderComponent={
+          <CarListHeader
+            cars={cars}
+            fetchedAt={state.status === 'ready' ? state.fetchedAt : undefined}
+            freshness={state.status === 'ready' ? state.freshness : undefined}
+          />
+        }
         ListEmptyComponent={<ListPlaceholder state={state} styles={styles} />}
         ItemSeparatorComponent={Separator}
         contentContainerStyle={styles.content}

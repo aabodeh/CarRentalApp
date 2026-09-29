@@ -1,8 +1,8 @@
-import { act, renderHook, waitFor } from '@testing-library/react-native';
+import { act, renderHook } from '@testing-library/react-native';
 
 import { cars } from '../../src/data/dummy/cars';
 import { useCar } from '../../src/hooks/useCar';
-import { CarNotFoundError, carRepository } from '../../src/repositories/carRepository';
+import { stubCarRepository } from '../helpers/carRepositoryStub';
 
 describe('useCar', () => {
   afterEach(() => {
@@ -10,56 +10,58 @@ describe('useCar', () => {
   });
 
   it('starts in the loading state', () => {
-    jest.spyOn(carRepository, 'getCarById').mockReturnValue(new Promise(() => {}));
+    stubCarRepository();
 
     const { result } = renderHook(() => useCar('car-05'));
 
     expect(result.current).toEqual({ status: 'loading' });
   });
 
-  it('is ready with the requested car', async () => {
-    jest.spyOn(carRepository, 'getCarById').mockResolvedValue(cars[4]);
-
+  it('is ready with the requested car and how old the data is', () => {
+    const repo = stubCarRepository();
     const { result } = renderHook(() => useCar('car-05'));
 
-    await waitFor(() => expect(result.current).toEqual({ status: 'ready', car: cars[4] }));
-    expect(carRepository.getCarById).toHaveBeenCalledWith('car-05');
+    repo.emitCars(cars, { fetchedAt: '2026-09-29T08:00:00.000Z', freshness: 'stale' });
+
+    expect(result.current).toEqual({
+      status: 'ready',
+      car: cars[4],
+      fetchedAt: '2026-09-29T08:00:00.000Z',
+      freshness: 'stale',
+    });
   });
 
-  it('reports not-found, distinct from an error, when the car does not exist', async () => {
-    jest.spyOn(carRepository, 'getCarById').mockRejectedValue(new CarNotFoundError('car-404'));
-
+  it('reports not-found, distinct from an error, when the car is not in the list', () => {
+    const repo = stubCarRepository();
     const { result } = renderHook(() => useCar('car-404'));
 
-    await waitFor(() => expect(result.current).toEqual({ status: 'not-found' }));
+    repo.emitCars(cars);
+
+    expect(result.current).toEqual({ status: 'not-found' });
   });
 
-  it('reports an error, and recovers when retry succeeds', async () => {
-    jest
-      .spyOn(carRepository, 'getCarById')
-      .mockRejectedValueOnce(new Error('offline'))
-      .mockResolvedValueOnce(cars[4]);
+  it('reports an error with retry when there are no cars at all', () => {
+    const repo = stubCarRepository();
     const { result } = renderHook(() => useCar('car-05'));
-    await waitFor(() => expect(result.current.status).toBe('error'));
+    repo.emitError(new Error('offline'));
 
     const state = result.current;
     if (state.status !== 'error') throw new Error('expected error state');
     act(() => state.retry());
 
-    await waitFor(() => expect(result.current).toEqual({ status: 'ready', car: cars[4] }));
+    expect(result.current).toEqual({ status: 'loading' });
+    expect(repo.refresh).toHaveBeenCalledTimes(1);
   });
 
-  it('loads the new car when the id changes', async () => {
-    jest
-      .spyOn(carRepository, 'getCarById')
-      .mockImplementation(async (id) => cars.find((car) => car.id === id)!);
+  it('shows the new car when the id changes', () => {
+    const repo = stubCarRepository();
     const { result, rerender } = renderHook(({ id }: { id: string }) => useCar(id), {
       initialProps: { id: 'car-01' },
     });
-    await waitFor(() => expect(result.current).toEqual({ status: 'ready', car: cars[0] }));
+    repo.emitCars(cars);
 
     rerender({ id: 'car-02' });
 
-    await waitFor(() => expect(result.current).toEqual({ status: 'ready', car: cars[1] }));
+    expect(result.current).toMatchObject({ status: 'ready', car: cars[1] });
   });
 });

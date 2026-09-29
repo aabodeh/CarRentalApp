@@ -2,9 +2,11 @@
 
 Hard-coded sample data, typed against `src/types/`.
 
-> **Temporary by design.** This gets replaced by the API in a later PR. When that happens, the
-> dummy source is either deleted or kept behind a flag for tests. Either way, the change is
-> confined to `src/repositories/`, and no screen imports this folder (ESLint enforces that).
+> **No longer the app's data source.** Since PR 4 the app reads cars from the API (MockAPI) and
+> caches them on the phone. This folder stays for two reasons: it is **the seed source** for the
+> API (`docs/api/cars.seed.json` is generated from it, and a test keeps them in sync), and it is
+> the **test fixture** most tests use. No screen or repository imports it at runtime, and ESLint
+> keeps screens out.
 
 - `cars.ts`: ten cars for a rental shop on Funen (Odense, Svendborg, Middelfart, Nyborg). The mix
   is city cars, EVs, hybrids, a station wagon (Audi A6 Avant) and a van (VW Transporter). Day

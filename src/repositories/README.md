@@ -26,17 +26,21 @@ only_. If a swap forces you to edit a screen, the boundary was drawn wrong.
 
 ## Today
 
-- `carRepository.ts`: `getCars()` and `getCarById(id)`, backed by `src/data/dummy/`. It answers
-  after `SIMULATED_LATENCY_MS` (400 ms, **temporary**) so the UI has real loading states now.
-  `getCarById` throws `CarNotFoundError` for an unknown id. The `CarRepository` type is the contract
-  the API-backed version will implement.
+- `carRepository.ts`: **cache, then refresh (K1).**
+  - `subscribeCars(listener)` delivers the cached list at once (freshness `refreshing`), then
+    the API's (`fresh`).
+  - If the API fails and a cache exists, the cache is re-sent as `stale`. Only with no cache at
+    all is it an error.
+  - `refreshCars()` is for pull-to-refresh and retry; concurrent calls share one request.
+  - `getCarById(id)` is cache-first, so a car already seen can be booked offline.
+- `bookingRepository.ts`:
+  - `createBooking` validates, prices from the car's rate (never the form) and saves to
+    `storage/` as `pending`. It never needs the network.
+  - `syncBooking` POSTs the booking. Accepted → `completed`. Unreachable (offline, timeout, no
+    URL) → stays `pending`. Rejected by the server → `failed`.
+  - PR 5 adds the retry queue (K2) behind `syncBooking`.
 
-- `bookingRepository.ts`: `createBooking(input)` re-validates the input (`validateBooking`),
-  prices the booking from the car's rate (never from the form) and saves it with
-  `syncStatus: 'pending'`. `syncBooking(id)` settles it to `'completed'`. **This is the K3 seam:** the
-  next PR replaces `syncBooking`'s internals with the API call and the retry queue (K2), and nothing
-  above it changes. `createInMemoryBookingRepository()` gives tests a fresh store.
-- `simulatedLatency.ts`: the shared temporary delay.
-
-In tests, stub a repository method with `jest.spyOn(carRepository, 'getCars')` instead of mocking
-the whole module.
+Both are built by factories (`createCarRepository`, `createBookingRepository`) with their
+dependencies (API functions, storage) passed in. The app uses one shared instance of each, and
+repository tests build their own with fakes. Hook and screen tests use the helpers in
+`__tests__/helpers/`.

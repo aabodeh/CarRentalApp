@@ -12,5 +12,9 @@ They mirror the class diagram in our design document, so the code and the report
 - Dates are strings: `YYYY-MM-DD` for booking days, full ISO-8601 for `createdAt`. A `Date`
   object does not survive a JSON round-trip through storage or the API.
 
+- `guards.ts`: runtime checks (`isCar`, `isBooking`, and array forms) for data from outside
+  TypeScript's reach, i.e. API responses and AsyncStorage. Keep each one field-for-field in step
+  with its type.
+
 Import from `src/types`, not from the individual files. Types used by exactly one module stay
 next to that module.

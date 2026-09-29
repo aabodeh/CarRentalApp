@@ -69,11 +69,29 @@ and not inside it. A hook ignores any answer that arrives after it unmounts. See
 
 The NFRs land in specific places:
 
-| NFR              | Where it lives                                                                       |
-| ---------------- | ------------------------------------------------------------------------------------ |
-| K1 offline reads | repository reads `storage/` cache first, refreshes from `services/api/`, writes back |
-| K2 retry queue   | failed writes go to a queue in `storage/`; the repository owns the backoff           |
-| K3 sync status   | the repository knows the status; a hook exposes it; a component renders it           |
+| NFR              | Where it lives today                                                                                                                                                                | Status |
+| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
+| K1 offline reads | `carRepository` serves `storage/carCache` first, refreshes from `services/api/`, writes back. `useCars` refreshes when the connection returns. `OfflineBanner` + `DataAge` show it. | PR 4   |
+| K2 retry queue   | `bookingRepository.syncBooking` leaves unreachable bookings `pending`. The queue with backoff goes in `storage/` under the reserved key `carrental.v1.sync-queue`.                  | PR 5   |
+| K3 sync status   | `bookingRepository` sets `syncStatus`, `BookingContext` holds it, `SyncStatusBadge` renders it.                                                                                     | PR 3–4 |
+
+**Cache, then refresh.** Every read the user can see offline goes through a repository that:
+
+1. serves the cached copy immediately, if there is one
+2. asks the API in the background and, on success, updates both the cache and the UI
+3. on failure _with_ a cache, keeps serving the cache and marks it `stale`
+4. on failure _without_ a cache, reports the error
+
+A hook never waits for the network when a cached answer exists.
+
+**Storage keys** are `carrental.v<STORAGE_VERSION>.<name>` and hold `{ version, savedAt, data }`.
+Only `src/storage/keyValueStore.ts` touches AsyncStorage. Stored data is always read through a
+guard from `src/types/guards.ts`, and anything corrupt or outdated reads as "nothing stored". If
+you change a stored shape, bump `STORAGE_VERSION`. The keys in use are listed in
+`src/storage/README.md`.
+
+**API replies are untrusted.** Every response is validated by a guard before it becomes a domain
+object. A malformed reply is an `ApiPayloadError`, never a crash later on.
 
 ## Folder structure
 
@@ -123,6 +141,7 @@ the design document. Update the diagram first, then mirror it in `src/types/`.
 
 - `StyleSheet.create` at the bottom of the file. No inline style objects — they allocate on
   every render and cannot be reused.
+- Inline style objects fail lint in `src/**/*.tsx` (`no-restricted-syntax` in `eslint.config.js`).
 - Every colour, spacing value, radius, font size and animation duration comes from
   `src/theme/`. Nothing in `src/` hard-codes a hex, a size or a duration. If the token you need
   does not exist, add it to the theme (and to its README) rather than inlining it.
@@ -186,6 +205,10 @@ Rules:
   by explicit amounts (`jest.advanceTimersByTimeAsync(SIMULATED_LATENCY_MS)`), inside `act` when
   anything is rendered. Never `runAllTimers`: the loading skeleton pulses forever, so "run every
   timer" never finishes.
+- **Console output fails the test.** Any `console.error` or `console.warn` during a test fails it
+  (`jest.setup.js`). A test that _expects_ a warning opts in with
+  `jest.spyOn(console, 'error').mockImplementation(() => {})` and asserts on the spy. Do not opt in
+  to hide a warning you do not understand; fix the cause (FL-011, FL-012).
 - **Lists in tests.** `FlatList` renders more rows on a timer. A test that renders one uses fake
   timers and calls `act(() => jest.runOnlyPendingTimers())` in `afterEach`. Otherwise the timer can
   fire after the test and log an intermittent `act()` warning (FL-012).
@@ -339,3 +362,21 @@ versions.
 and check the signature and any deprecation notice. This is the general form of "Expo HAS CHANGED"
 at the top of this file.
 See `docs/ai-log/failures/FL-011 deprecated datetimepicker onChange from memory.md`.
+
+### Check that a seam can carry every NFR before building on it
+
+An agent designed `CarRepository` as `getCars(): Promise<Car[]>` and commented that the cache (K1)
+would later fit "behind this same shape". It could not: cache-then-refresh means two answers, and a
+promise resolves once. It had to be replaced a PR later, and every hook and screen test was rewritten.
+
+**Instead:** when you design an interface, write out how K1, K2 and K3 would flow through it. If the
+shape cannot express one of them, change the shape now. Treat "no changes needed later" as a claim
+to check, not a comfort. See `docs/ai-log/failures/FL-013 repository contract not designed for k1.md`.
+
+### User-facing copy only promises what the app does
+
+An agent wrote "Please contact us" in an error message. The app has no contact channel.
+
+**Instead:** state the fact. No "contact us", "we'll email you" or "we'll retry" unless that path
+exists and is tested. What the user can do next is a product decision for the design document.
+See `docs/ai-log/failures/FL-014 invented support path in copy.md`.

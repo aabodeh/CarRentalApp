@@ -2,10 +2,11 @@ import { cars } from '../../src/data/dummy/cars';
 import {
   BookingNotFoundError,
   InvalidBookingError,
-  createInMemoryBookingRepository,
-  type BookingRepository,
+  createBookingRepository,
 } from '../../src/repositories/bookingRepository';
-import { CarNotFoundError, SIMULATED_LATENCY_MS } from '../../src/repositories/carRepository';
+import { CarNotFoundError } from '../../src/repositories/carRepository';
+import { ApiNetworkError, ApiStatusError, ApiTimeoutError } from '../../src/services/api/client';
+import type { Booking } from '../../src/types';
 
 const tesla = cars.find((car) => car.id === 'car-05')!;
 
@@ -17,91 +18,123 @@ const input = {
   endDate: '2026-10-04',
 };
 
-/** Runs a repository call to completion under fake timers. */
-async function settle<T>(promise: Promise<T>): Promise<T> {
-  const result = promise.then(
-    (value) => ({ ok: true as const, value }),
-    (error: unknown) => ({ ok: false as const, error })
-  );
-  await jest.runAllTimersAsync();
-  const outcome = await result;
-  if (!outcome.ok) throw outcome.error;
-  return outcome.value;
+function setup(saved: Booking[] = []) {
+  let stored = saved;
+  const store = {
+    read: jest.fn(async () => stored),
+    write: jest.fn(async (next: Booking[]) => {
+      stored = next;
+    }),
+  };
+  const postBooking = jest.fn<Promise<{ remoteId: string }>, [Booking]>();
+  const carSource = {
+    getCarById: jest.fn(async (id: string) => {
+      const car = cars.find((candidate) => candidate.id === id);
+      if (!car) throw new CarNotFoundError(id);
+      return car;
+    }),
+  };
+  const repository = createBookingRepository({ store, postBooking, cars: carSource });
+  return { repository, store, postBooking, stored: () => stored };
 }
 
 describe('bookingRepository', () => {
-  let bookingRepository: BookingRepository;
-
   beforeEach(() => {
     jest.useFakeTimers({ now: new Date(2026, 8, 28, 10, 0) });
-    bookingRepository = createInMemoryBookingRepository();
   });
 
   afterEach(() => {
     jest.useRealTimers();
   });
 
-  it('creates a booking with pending sync status', async () => {
-    const booking = await settle(bookingRepository.createBooking(input));
+  it('creates a pending booking, priced from the car, and saves it on the phone', async () => {
+    const { repository, stored } = setup();
 
-    expect(booking).toMatchObject({ ...input, syncStatus: 'pending' });
-    expect(booking.id).toEqual(expect.any(String));
+    const booking = await repository.createBooking(input);
+
+    expect(booking).toMatchObject({
+      ...input,
+      syncStatus: 'pending',
+      totalPrice: tesla.pricePerDay * 3,
+    });
     expect(booking.createdAt).toBe(new Date(2026, 8, 28, 10, 0).toISOString());
+    expect(stored()).toEqual([booking]);
   });
 
-  it('computes the total price itself, from the car and the dates', async () => {
-    const booking = await settle(bookingRepository.createBooking(input));
+  it('keeps bookings across a restart', async () => {
+    const first = setup();
+    const booking = await first.repository.createBooking(input);
 
-    expect(booking.totalPrice).toBe(tesla.pricePerDay * 3);
+    const restarted = setup(first.stored());
+
+    await expect(restarted.repository.getBookings()).resolves.toEqual([booking]);
   });
 
   it('gives every booking a unique id', async () => {
-    const first = await settle(bookingRepository.createBooking(input));
-    const second = await settle(bookingRepository.createBooking(input));
+    const { repository } = setup();
 
-    expect(first.id).not.toBe(second.id);
+    const a = await repository.createBooking(input);
+    const b = await repository.createBooking(input);
+
+    expect(a.id).not.toBe(b.id);
   });
 
-  it('settles a pending booking to completed when it syncs', async () => {
-    const booking = await settle(bookingRepository.createBooking(input));
+  it('marks a booking completed once the server has accepted it', async () => {
+    const { repository, postBooking, stored } = setup();
+    const booking = await repository.createBooking(input);
+    postBooking.mockResolvedValue({ remoteId: '17' });
 
-    const synced = await settle(bookingRepository.syncBooking(booking.id));
+    const synced = await repository.syncBooking(booking.id);
 
-    expect(synced).toEqual({ ...booking, syncStatus: 'completed' });
-    expect(await settle(bookingRepository.getBookings())).toEqual([synced]);
+    expect(postBooking).toHaveBeenCalledWith(booking);
+    expect(synced.syncStatus).toBe('completed');
+    expect(stored()[0].syncStatus).toBe('completed');
   });
 
-  it('answers after the simulated latency, like the car repository', async () => {
-    const onResolve = jest.fn();
-    bookingRepository.createBooking(input).then(onResolve);
+  it.each([
+    ['offline', new ApiNetworkError(new Error('Network request failed'))],
+    ['timed out', new ApiTimeoutError()],
+  ])('leaves a booking pending, to sync later, when the server is %s', async (_label, error) => {
+    const { repository, postBooking, stored } = setup();
+    const booking = await repository.createBooking(input);
+    postBooking.mockRejectedValue(error);
 
-    await jest.advanceTimersByTimeAsync(SIMULATED_LATENCY_MS - 1);
-    expect(onResolve).not.toHaveBeenCalled();
-    await jest.advanceTimersByTimeAsync(1);
-    expect(onResolve).toHaveBeenCalled();
+    const result = await repository.syncBooking(booking.id);
+
+    expect(result.syncStatus).toBe('pending');
+    expect(stored()[0].syncStatus).toBe('pending');
+  });
+
+  it('marks a booking failed when the server rejects it', async () => {
+    const { repository, postBooking } = setup();
+    const booking = await repository.createBooking(input);
+    postBooking.mockRejectedValue(new ApiStatusError(422));
+
+    await expect(repository.syncBooking(booking.id)).resolves.toMatchObject({
+      syncStatus: 'failed',
+    });
   });
 
   it('rejects invalid input, re-checking it the way a server would', async () => {
-    await expect(
-      settle(bookingRepository.createBooking({ ...input, renterEmail: 'not-an-email' }))
-    ).rejects.toThrow(InvalidBookingError);
-  });
+    const { repository, store } = setup();
 
-  it('rejects a booking that starts in the past', async () => {
     await expect(
-      settle(bookingRepository.createBooking({ ...input, startDate: '2026-09-01' }))
-    ).rejects.toMatchObject({ errors: { startDate: "Pick-up can't be in the past." } });
+      repository.createBooking({ ...input, renterEmail: 'not-an-email' })
+    ).rejects.toThrow(InvalidBookingError);
+    expect(store.write).not.toHaveBeenCalled();
   });
 
   it('rejects a booking for a car that does not exist', async () => {
-    await expect(
-      settle(bookingRepository.createBooking({ ...input, carId: 'car-404' }))
-    ).rejects.toThrow(CarNotFoundError);
+    const { repository } = setup();
+
+    await expect(repository.createBooking({ ...input, carId: 'car-404' })).rejects.toThrow(
+      CarNotFoundError
+    );
   });
 
   it('rejects syncing a booking that does not exist', async () => {
-    await expect(settle(bookingRepository.syncBooking('booking-404'))).rejects.toThrow(
-      BookingNotFoundError
-    );
+    const { repository } = setup();
+
+    await expect(repository.syncBooking('booking-404')).rejects.toThrow(BookingNotFoundError);
   });
 });

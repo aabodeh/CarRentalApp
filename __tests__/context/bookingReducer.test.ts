@@ -69,4 +69,19 @@ describe('bookingReducer', () => {
 
     expect(state.bookings[1]).toBe(other);
   });
+
+  it('adds bookings saved in an earlier session, keeping ones created since launch', () => {
+    const saved = { ...pending, id: 'booking-saved' };
+    const createdNow = bookingReducer(initialBookingState, {
+      type: 'create/success',
+      booking: pending,
+    });
+
+    const state = bookingReducer(createdNow, {
+      type: 'bookings/loaded',
+      bookings: [saved, pending],
+    });
+
+    expect(state.bookings).toEqual([saved, pending]);
+  });
 });

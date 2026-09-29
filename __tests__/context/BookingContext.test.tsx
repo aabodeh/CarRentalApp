@@ -2,10 +2,12 @@ import { act, renderHook, waitFor } from '@testing-library/react-native';
 import type { ReactNode } from 'react';
 
 import { BookingProvider, useBookings } from '../../src/context/BookingContext';
+import { cars } from '../../src/data/dummy/cars';
 import {
-  createInMemoryBookingRepository,
+  createBookingRepository,
   type BookingRepository,
 } from '../../src/repositories/bookingRepository';
+import { ApiNetworkError } from '../../src/services/api/client';
 import type { Booking } from '../../src/types';
 
 const input = {
@@ -16,11 +18,29 @@ const input = {
   endDate: '2026-10-03',
 };
 
-function setup(repository: BookingRepository = createInMemoryBookingRepository()) {
+/** A booking repository over an in-memory store and a controllable API. */
+function makeRepository(saved: Booking[] = []) {
+  let stored = saved;
+  const postBooking = jest.fn<Promise<{ remoteId: string }>, [Booking]>();
+  postBooking.mockResolvedValue({ remoteId: '1' });
+  const repository = createBookingRepository({
+    store: {
+      read: async () => stored,
+      write: async (next) => {
+        stored = next;
+      },
+    },
+    postBooking,
+    cars: { getCarById: async (id) => cars.find((car) => car.id === id)! },
+  });
+  return { repository, postBooking };
+}
+
+function setup(repository: BookingRepository) {
   const wrapper = ({ children }: { children: ReactNode }) => (
     <BookingProvider repository={repository}>{children}</BookingProvider>
   );
-  return { repository, ...renderHook(() => useBookings(), { wrapper }) };
+  return renderHook(() => useBookings(), { wrapper });
 }
 
 describe('BookingContext', () => {
@@ -33,43 +53,63 @@ describe('BookingContext', () => {
     jest.restoreAllMocks();
   });
 
-  it('creates a booking that is pending, then completed once it has synced', async () => {
-    const { result } = setup();
+  it('creates a booking that is pending, then completed once the server accepts it', async () => {
+    const { repository } = makeRepository();
+    const { result } = setup(repository);
 
     let created: Booking | undefined;
     await act(async () => {
-      const promise = result.current.createBooking(input);
-      await jest.advanceTimersByTimeAsync(400);
-      created = await promise;
+      created = await result.current.createBooking(input);
     });
 
     expect(created?.syncStatus).toBe('pending');
-    expect(result.current.bookings).toEqual([created]);
+    await waitFor(() => expect(result.current.bookings[0].syncStatus).toBe('completed'));
+  });
+
+  it('keeps a booking pending when it is made offline', async () => {
+    const { repository, postBooking } = makeRepository();
+    postBooking.mockRejectedValue(new ApiNetworkError(new Error('offline')));
+    const { result } = setup(repository);
 
     await act(async () => {
-      await jest.advanceTimersByTimeAsync(400);
+      await result.current.createBooking(input);
     });
+    await act(async () => {});
 
-    expect(result.current.bookings[0].syncStatus).toBe('completed');
+    expect(result.current.bookings).toHaveLength(1);
+    expect(result.current.bookings[0].syncStatus).toBe('pending');
+  });
+
+  it('shows bookings saved in an earlier session', async () => {
+    const earlier = makeRepository();
+    await earlier.repository.createBooking(input);
+    const saved = await earlier.repository.getBookings();
+
+    const { result } = setup(makeRepository(saved).repository);
+
+    await waitFor(() => expect(result.current.bookings).toEqual(saved));
   });
 
   it('reports submitting while a booking is being created', async () => {
-    const { result } = setup();
+    const { repository } = makeRepository();
+    const { result } = setup(repository);
 
+    let pending: Promise<Booking> | undefined;
     act(() => {
-      void result.current.createBooking(input);
+      pending = result.current.createBooking(input);
     });
 
     expect(result.current.creation).toEqual({ status: 'submitting' });
     await act(async () => {
-      await jest.runAllTimersAsync();
+      await pending;
     });
     expect(result.current.creation).toEqual({ status: 'idle' });
   });
 
   it('creates only one booking when asked twice before the first finishes', async () => {
-    const { result, repository } = setup();
+    const { repository } = makeRepository();
     const createSpy = jest.spyOn(repository, 'createBooking');
+    const { result } = setup(repository);
 
     let first: Promise<Booking> | undefined;
     let second: Promise<Booking> | undefined;
@@ -78,7 +118,7 @@ describe('BookingContext', () => {
       second = result.current.createBooking(input);
     });
     await act(async () => {
-      await jest.runAllTimersAsync();
+      await first;
     });
 
     expect(second).toBe(first);
@@ -87,28 +127,26 @@ describe('BookingContext', () => {
   });
 
   it('exposes the error and adds nothing when creation fails', async () => {
-    const { result } = setup();
+    const { repository } = makeRepository();
+    const { result } = setup(repository);
 
     await act(async () => {
-      const promise = result.current.createBooking({ ...input, renterEmail: 'nope' });
-      // Attach the expectation before advancing time, or the rejection counts as unhandled.
-      const assertion = expect(promise).rejects.toThrow('The booking is not valid');
-      await jest.runAllTimersAsync();
-      await assertion;
+      await expect(result.current.createBooking({ ...input, renterEmail: 'nope' })).rejects.toThrow(
+        'The booking is not valid'
+      );
     });
 
     expect(result.current.creation.status).toBe('error');
     expect(result.current.bookings).toEqual([]);
   });
 
-  it('marks a booking as failed, not lost, when syncing it fails', async () => {
-    const repository = createInMemoryBookingRepository();
-    jest.spyOn(repository, 'syncBooking').mockRejectedValue(new Error('offline'));
+  it('marks a booking as failed, not lost, when syncing it throws unexpectedly', async () => {
+    const { repository } = makeRepository();
+    jest.spyOn(repository, 'syncBooking').mockRejectedValue(new Error('disk full'));
     const { result } = setup(repository);
 
     await act(async () => {
-      void result.current.createBooking(input);
-      await jest.runAllTimersAsync();
+      await result.current.createBooking(input);
     });
 
     await waitFor(() => expect(result.current.bookings[0]?.syncStatus).toBe('failed'));
