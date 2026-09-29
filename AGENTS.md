@@ -380,3 +380,13 @@ An agent wrote "Please contact us" in an error message. The app has no contact c
 **Instead:** state the fact. No "contact us", "we'll email you" or "we'll retry" unless that path
 exists and is tested. What the user can do next is a product decision for the design document.
 See `docs/ai-log/failures/FL-014 invented support path in copy.md`.
+
+### An external service's behaviour is not a fact until you have seen it
+
+An agent wrote "MockAPI numbers the cars 1–10" into `docs/api/README.md` and shipped a seed without
+ids. It had never checked. MockAPI stores pasted data as-is, so all ten cars came back without an
+`id` and failed the app's validation.
+
+**Instead:** until you've observed how a third-party service behaves, document it as "expected,
+unverified". Before wiring in a real endpoint, fetch it once and run the reply through the app's
+own guards. See `docs/ai-log/failures/FL-015 assumed mockapi adds ids to seed.md`.
