@@ -25,7 +25,7 @@ before the deadline.
 
 ## Index — interactions
 
-Chronological. A-001 to A-007 are from 2026-09-22; A-008 to A-010 are from 2026-09-28.
+Chronological. A-001 to A-007 are from 2026-09-22; A-008 to A-010 are from 2026-09-28; A-011 is from 2026-09-29.
 
 | ID                                                  | Tool        | Mode    | Area | What                                                                                                             |
 | --------------------------------------------------- | ----------- | ------- | ---- | ---------------------------------------------------------------------------------------------------------------- |
@@ -39,6 +39,7 @@ Chronological. A-001 to A-007 are from 2026-09-22; A-008 to A-010 are from 2026-
 | [[A-008 domain types design system and dummy data]] | Claude Code | agentic | code | PR 1 foundation: types, tokens, a11y rules, dummy cars ([PR #4](https://github.com/aabodeh/CarRentalApp/pull/4)) |
 | [[A-009 car repository hook and list screen]]       | Claude Code | agentic | code | Car list: repository, hooks, motion, a11y ([PR #5](https://github.com/aabodeh/CarRentalApp/pull/5))              |
 | [[A-010 details booking flow and context]]          | Claude Code | agentic | code | Details, booking form, BookingContext ([PR #6](https://github.com/aabodeh/CarRentalApp/pull/6))                  |
+| [[A-011 api offline cache and banner]]              | Claude Code | agentic | code | API client, offline cache (K1), offline banner [[P8]]                                                            |
 
 ## Index — failures
 
@@ -56,6 +57,8 @@ Chronological. A-001 to A-007 are from 2026-09-22; A-008 to A-010 are from 2026-
 | [[FL-010 merged transforms cancelled the entrance animation]]    | A-010        | Two animated `transform` styles in one array, so the press scale erased the entrance                     | AI self-review; tests were green         |
 | [[FL-011 deprecated datetimepicker onChange from memory]]        | A-010        | Used datetimepicker `onChange`, deprecated in v9 (dev warning)                                           | Reading the library source               |
 | [[FL-012 flaky flatlist act warning shipped in tests]]           | A-009        | CarList tests used real timers; FlatList's deferred render logged an intermittent act() warning, on main | A full run during A-010; reproduced 3/6  |
+| [[FL-013 repository contract not designed for k1]]               | A-009        | Single-shot `Promise<Car[]>` repository contract could not express K1's cache-then-refresh               | Plan-time review in A-011                |
+| [[FL-014 invented support path in copy]]                         | A-011        | Failed-booking copy said "Please contact us"; the app has no contact channel                             | AI self-review; nothing else would have  |
 
 Add more as they happen.
 
@@ -63,15 +66,16 @@ Add more as they happen.
 
 Long prompts live in `prompts/` and are wiki-linked from the entries that produced and consumed them.
 
-|                                     | Drafted in     | Used in |
-| ----------------------------------- | -------------- | ------- |
-| [[P1]] — initial setup prompt       | A-001          | A-003   |
-| [[P2]] — plan review changes        | A-002          | A-003   |
-| [[P3]] — repo configuration prompt  | A-004          | A-005   |
-| [[P4]] — AI dossier backfill prompt | A-006          | A-007   |
-| [[P5]] — PR 1 foundation prompt     | pasted by Moha | A-008   |
-| [[P6]] — PR 2 car list prompt       | pasted by Moha | A-009   |
-| [[P7]] — PR 3 booking flow prompt   | pasted by Moha | A-010   |
+|                                      | Drafted in     | Used in |
+| ------------------------------------ | -------------- | ------- |
+| [[P1]] — initial setup prompt        | A-001          | A-003   |
+| [[P2]] — plan review changes         | A-002          | A-003   |
+| [[P3]] — repo configuration prompt   | A-004          | A-005   |
+| [[P4]] — AI dossier backfill prompt  | A-006          | A-007   |
+| [[P5]] — PR 1 foundation prompt      | pasted by Moha | A-008   |
+| [[P6]] — PR 2 car list prompt        | pasted by Moha | A-009   |
+| [[P7]] — PR 3 booking flow prompt    | pasted by Moha | A-010   |
+| [[P8]] — PR 4 API and offline prompt | pasted by Moha | A-011   |
 
 ## Reading this vault in Obsidian
 

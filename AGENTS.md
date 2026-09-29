@@ -362,3 +362,21 @@ versions.
 and check the signature and any deprecation notice. This is the general form of "Expo HAS CHANGED"
 at the top of this file.
 See `docs/ai-log/failures/FL-011 deprecated datetimepicker onChange from memory.md`.
+
+### Check that a seam can carry every NFR before building on it
+
+An agent designed `CarRepository` as `getCars(): Promise<Car[]>` and commented that the cache (K1)
+would later fit "behind this same shape". It could not: cache-then-refresh means two answers, and a
+promise resolves once. It had to be replaced a PR later, and every hook and screen test was rewritten.
+
+**Instead:** when you design an interface, write out how K1, K2 and K3 would flow through it. If the
+shape cannot express one of them, change the shape now. Treat "no changes needed later" as a claim
+to check, not a comfort. See `docs/ai-log/failures/FL-013 repository contract not designed for k1.md`.
+
+### User-facing copy only promises what the app does
+
+An agent wrote "Please contact us" in an error message. The app has no contact channel.
+
+**Instead:** state the fact. No "contact us", "we'll email you" or "we'll retry" unless that path
+exists and is tested. What the user can do next is a product decision for the design document.
+See `docs/ai-log/failures/FL-014 invented support path in copy.md`.
