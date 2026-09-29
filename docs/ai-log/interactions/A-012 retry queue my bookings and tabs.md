@@ -9,7 +9,7 @@ task: PR 5 — K2 retry queue with backoff and idempotent retries, My bookings s
 prompt_or_link: '[[P9]]'
 verification: TODO (Moha)
 decision: TODO (Moha)
-related_pr:
+related_pr: https://github.com/aabodeh/CarRentalApp/pull/9
 ---
 
 # A-012 — retry queue, My bookings and tabs
@@ -144,12 +144,20 @@ now wait as `pending` and are sent on reconnect. The backoff applies to failures
   of the report notes also said all PRs were "merged through review". `gh pr view` shows #1 and #2
   have no recorded review, and #2 was merged by its author. The notes now state exactly what GitHub
   records.
+- **A wrong device test step, corrected after the PR was opened.** The first PR description told
+  Moha to rename the MockAPI resource to force an automatic retry. That produces a **404**, which
+  the app treats as a refusal: no automatic retries and no toast. It is now a network-degradation
+  step (Network Link Conditioner), plus a separate refusal step.
 - **Commits that aren't green on their own:** the repositories and context commits, because
   `BookingScreen` only compiles after the navigation commit. Both commit messages say so.
 
-**Verification the AI ran (AI verification, not human):** filled in in the PR description once
-`npm run check` has run 5 times and both bundles have been built. The idempotency mutation check
-passed: without the lookup, both duplicate tests fail, and restored, all 51 repository tests pass.
+**Verification the AI ran (AI verification, not human):**
+
+- `npm run check` **5 of 5** runs, each with exit 0, 354/354 tests and 0 console lines.
+- `expo-doctor` passed 21/21, after the patch bump.
+- iOS and Android bundles served with HTTP 200 and no Metro warnings.
+- `expo export`: 3 font files, a 3.1 MB bundle. The idempotency mutation check
+  passed: without the lookup, both duplicate tests fail, and restored, all 51 repository tests pass.
 
 **Not verified by anyone yet (needs a device):**
 

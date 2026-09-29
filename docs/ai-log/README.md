@@ -40,7 +40,7 @@ Chronological. A-001 to A-007 are from 2026-09-22; A-008 to A-010 are from 2026-
 | [[A-009 car repository hook and list screen]]       | Claude Code | agentic | code | Car list: repository, hooks, motion, a11y ([PR #5](https://github.com/aabodeh/CarRentalApp/pull/5))              |
 | [[A-010 details booking flow and context]]          | Claude Code | agentic | code | Details, booking form, BookingContext ([PR #6](https://github.com/aabodeh/CarRentalApp/pull/6))                  |
 | [[A-011 api offline cache and banner]]              | Claude Code | agentic | code | API client, offline cache (K1), offline banner ([PR #7](https://github.com/aabodeh/CarRentalApp/pull/7))         |
-| [[A-012 retry queue my bookings and tabs]]          | Claude Code | agentic | code | Retry queue (K2), My bookings, tabs, toast (K3) [[P9]]                                                           |
+| [[A-012 retry queue my bookings and tabs]]          | Claude Code | agentic | code | Retry queue (K2), My bookings, tabs, toast (K3) ([PR #9](https://github.com/aabodeh/CarRentalApp/pull/9))        |
 
 ## Index — failures
 
