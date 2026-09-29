@@ -1,111 +1,106 @@
-import { act, renderHook, waitFor } from '@testing-library/react-native';
+import { act, renderHook } from '@testing-library/react-native';
 
 import { cars } from '../../src/data/dummy/cars';
 import { useCars } from '../../src/hooks/useCars';
-import { carRepository } from '../../src/repositories/carRepository';
-
-/** A promise the test resolves by hand, to control exactly when the "network" answers. */
-function deferred<T>() {
-  let resolve!: (value: T) => void;
-  let reject!: (error: unknown) => void;
-  const promise = new Promise<T>((res, rej) => {
-    resolve = res;
-    reject = rej;
-  });
-  return { promise, resolve, reject };
-}
+import { stubCarRepository } from '../helpers/carRepositoryStub';
+import { setOffline, setOnline } from '../helpers/network';
 
 describe('useCars', () => {
   afterEach(() => {
     jest.restoreAllMocks();
+    setOnline();
   });
 
   it('starts in the loading state', () => {
-    jest.spyOn(carRepository, 'getCars').mockReturnValue(new Promise(() => {}));
+    stubCarRepository();
 
     const { result } = renderHook(() => useCars());
 
     expect(result.current.state).toEqual({ status: 'loading' });
   });
 
-  it('is ready with the cars once the repository answers', async () => {
-    jest.spyOn(carRepository, 'getCars').mockResolvedValue(cars);
-
+  it('is ready with the cars, their age and freshness', () => {
+    const repo = stubCarRepository();
     const { result } = renderHook(() => useCars());
 
-    await waitFor(() => expect(result.current.state).toEqual({ status: 'ready', cars }));
+    repo.emitCars(cars, { fetchedAt: '2026-09-29T08:00:00.000Z', freshness: 'stale' });
+
+    expect(result.current.state).toEqual({
+      status: 'ready',
+      cars,
+      fetchedAt: '2026-09-29T08:00:00.000Z',
+      freshness: 'stale',
+    });
   });
 
-  it('is empty when the repository returns no cars', async () => {
-    jest.spyOn(carRepository, 'getCars').mockResolvedValue([]);
-
+  it('shows cached cars, then replaces them when fresh ones arrive', () => {
+    const repo = stubCarRepository();
     const { result } = renderHook(() => useCars());
 
-    await waitFor(() => expect(result.current.state).toEqual({ status: 'empty' }));
+    repo.emitCars(cars, { freshness: 'refreshing' });
+    repo.emitCars(cars.slice(0, 2), { freshness: 'fresh' });
+
+    expect(result.current.state).toMatchObject({
+      status: 'ready',
+      cars: cars.slice(0, 2),
+      freshness: 'fresh',
+    });
   });
 
-  it('reports an error, and recovers when retry succeeds', async () => {
-    jest
-      .spyOn(carRepository, 'getCars')
-      .mockRejectedValueOnce(new Error('offline'))
-      .mockResolvedValueOnce(cars);
+  it('is empty when the repository has no cars', () => {
+    const repo = stubCarRepository();
     const { result } = renderHook(() => useCars());
-    await waitFor(() => expect(result.current.state.status).toBe('error'));
+
+    repo.emitCars([]);
+
+    expect(result.current.state.status).toBe('empty');
+  });
+
+  it('reports an error, and asks the repository again on retry', () => {
+    const repo = stubCarRepository();
+    const { result } = renderHook(() => useCars());
+    repo.emitError(new Error('offline'));
 
     const state = result.current.state;
     if (state.status !== 'error') throw new Error('expected error state');
-    expect(state.error.message).toBe('offline');
     act(() => state.retry());
 
     expect(result.current.state).toEqual({ status: 'loading' });
-    await waitFor(() => expect(result.current.state).toEqual({ status: 'ready', cars }));
+    expect(repo.refresh).toHaveBeenCalledTimes(1);
   });
 
-  it('keeps showing the list while refreshing, and updates it when the refresh lands', async () => {
-    const refreshed = cars.slice(0, 2);
-    const pending = deferred<typeof cars>();
-    jest
-      .spyOn(carRepository, 'getCars')
-      .mockResolvedValueOnce(cars)
-      .mockReturnValueOnce(pending.promise);
+  it('reports refreshing while a pull-to-refresh runs', async () => {
+    const repo = stubCarRepository();
+    let finish!: () => void;
+    repo.refresh.mockReturnValue(new Promise<void>((resolve) => (finish = resolve)));
     const { result } = renderHook(() => useCars());
-    await waitFor(() => expect(result.current.state.status).toBe('ready'));
 
     act(() => result.current.refresh());
-
     expect(result.current.isRefreshing).toBe(true);
-    expect(result.current.state).toEqual({ status: 'ready', cars });
 
-    await act(async () => pending.resolve(refreshed));
-
+    await act(async () => finish());
     expect(result.current.isRefreshing).toBe(false);
-    expect(result.current.state).toEqual({ status: 'ready', cars: refreshed });
   });
 
-  it('keeps the current list when a refresh fails', async () => {
-    jest
-      .spyOn(carRepository, 'getCars')
-      .mockResolvedValueOnce(cars)
-      .mockRejectedValueOnce(new Error('offline'));
-    const { result } = renderHook(() => useCars());
-    await waitFor(() => expect(result.current.state.status).toBe('ready'));
+  it('refreshes by itself when the connection comes back', () => {
+    const repo = stubCarRepository();
+    setOffline();
+    const { rerender } = renderHook(() => useCars());
+    expect(repo.refresh).not.toHaveBeenCalled();
 
-    act(() => result.current.refresh());
+    setOnline();
+    rerender({});
 
-    await waitFor(() => expect(result.current.isRefreshing).toBe(false));
-    expect(result.current.state).toEqual({ status: 'ready', cars });
+    expect(repo.refresh).toHaveBeenCalledTimes(1);
   });
 
-  it('ignores an answer that arrives after the screen has gone away', async () => {
-    const pending = deferred<typeof cars>();
-    jest.spyOn(carRepository, 'getCars').mockReturnValue(pending.promise);
-    const consoleError = jest.spyOn(console, 'error');
-    const { result, unmount } = renderHook(() => useCars());
+  it('stops listening when the screen goes away', () => {
+    const repo = stubCarRepository();
+    const { unmount } = renderHook(() => useCars());
+    expect(repo.listenerCount()).toBe(1);
 
     unmount();
-    await act(async () => pending.resolve(cars));
 
-    expect(result.current.state).toEqual({ status: 'loading' });
-    expect(consoleError).not.toHaveBeenCalled();
+    expect(repo.listenerCount()).toBe(0);
   });
 });

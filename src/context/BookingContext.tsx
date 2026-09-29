@@ -27,6 +27,7 @@ export type BookingState = {
 };
 
 export type BookingAction =
+  | { type: 'bookings/loaded'; bookings: Booking[] }
   | { type: 'create/start' }
   | { type: 'create/success'; booking: Booking }
   | { type: 'create/failure'; error: Error }
@@ -41,6 +42,12 @@ export const initialBookingState: BookingState = {
 /** Pure state transitions, unit-tested without rendering anything. */
 export function bookingReducer(state: BookingState, action: BookingAction): BookingState {
   switch (action.type) {
+    case 'bookings/loaded': {
+      // Saved bookings from a previous session. Anything created since launch is kept too.
+      const known = new Set(state.bookings.map((booking) => booking.id));
+      const saved = action.bookings.filter((booking) => !known.has(booking.id));
+      return { ...state, bookings: [...saved, ...state.bookings] };
+    }
     case 'create/start':
       return { ...state, creation: { status: 'submitting' } };
     case 'create/success':
@@ -69,8 +76,9 @@ export type BookingContextValue = {
   bookings: Booking[];
   creation: CreationState;
   /**
-   * Saves a booking (pending), then syncs it in the background. Calling it again while a
-   * creation is in flight returns the same promise, so a double tap can never create two.
+   * Saves a booking on the phone (pending), then tries to sync it in the background. Offline, it
+   * stays pending. Calling it again while a creation is in flight returns the same promise, so a
+   * double tap can never create two.
    */
   createBooking: (input: BookingInput) => Promise<Booking>;
 };
@@ -96,10 +104,17 @@ export function BookingProvider({
 
   useEffect(() => {
     mounted.current = true;
+    // Bookings survive a restart: load the ones saved on this phone.
+    repository.getBookings().then(
+      (bookings) => {
+        if (mounted.current) dispatch({ type: 'bookings/loaded', bookings });
+      },
+      () => undefined
+    );
     return () => {
       mounted.current = false;
     };
-  }, []);
+  }, [repository]);
 
   const sync = useCallback(
     (bookingId: string) => {

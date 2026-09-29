@@ -6,13 +6,13 @@ import { AccessibilityInfo, KeyboardAvoidingView, ScrollView } from 'react-nativ
 import { BookingProvider } from '../../src/context/BookingContext';
 import { cars } from '../../src/data/dummy/cars';
 import type { RootStackParamList } from '../../src/navigation/types';
-import {
-  createInMemoryBookingRepository,
-  type BookingRepository,
-} from '../../src/repositories/bookingRepository';
-import { SIMULATED_LATENCY_MS, carRepository } from '../../src/repositories/carRepository';
+import type { BookingRepository } from '../../src/repositories/bookingRepository';
 import BookingScreen from '../../src/screens/BookingScreen';
+import { ApiNetworkError } from '../../src/services/api/client';
 import { formatPrice } from '../../src/utils/formatPrice';
+import { makeBookingRepository } from '../helpers/bookingRepositoryFake';
+import { stubCarRepository } from '../helpers/carRepositoryStub';
+import { setOffline, setOnline } from '../helpers/network';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Booking'>;
 
@@ -22,18 +22,15 @@ const HEADER_HEIGHT = 56;
 /** Today is 28 September 2026 in these tests; the form defaults to 28 → 29 September. */
 const NOW = new Date(2026, 8, 28, 10, 0);
 
-/**
- * Advances fake time by `ms`. Not runAllTimers: the loading skeleton pulses forever, so "run every
- * timer" never finishes. One latency saves a booking; a second one syncs it.
- */
-async function wait(ms: number) {
+/** Lets pending promises (saving, the background sync) settle inside act. */
+async function settle() {
   await act(async () => {
-    await jest.advanceTimersByTimeAsync(ms);
+    await jest.advanceTimersByTimeAsync(0);
   });
 }
 
-async function renderScreen(repository: BookingRepository = createInMemoryBookingRepository()) {
-  jest.spyOn(carRepository, 'getCarById').mockResolvedValue(tesla);
+async function renderScreen(fake = makeBookingRepository()) {
+  const repo = stubCarRepository();
   const navigation = { navigate: jest.fn(), popToTop: jest.fn(), setOptions: jest.fn() };
   const props = {
     navigation,
@@ -42,13 +39,14 @@ async function renderScreen(repository: BookingRepository = createInMemoryBookin
 
   render(
     <HeaderHeightContext.Provider value={HEADER_HEIGHT}>
-      <BookingProvider repository={repository}>
+      <BookingProvider repository={fake.repository as BookingRepository}>
         <BookingScreen {...props} />
       </BookingProvider>
     </HeaderHeightContext.Provider>
   );
-  await wait(0);
-  return { navigation, repository };
+  repo.emitCars(cars);
+  await settle();
+  return { navigation, ...fake };
 }
 
 /** Picks a date in the native date picker, the way the iOS control reports it. */
@@ -71,8 +69,12 @@ describe('BookingScreen', () => {
   });
 
   afterEach(() => {
+    act(() => {
+      jest.runOnlyPendingTimers();
+    });
     jest.useRealTimers();
     jest.restoreAllMocks();
+    setOnline();
   });
 
   it('shows the car being booked and a price for the default dates', async () => {
@@ -154,21 +156,22 @@ describe('BookingScreen', () => {
   });
 
   it('creates a pending booking on submit', async () => {
-    const { repository } = await renderScreen();
+    const fake = makeBookingRepository();
+    fake.postBooking.mockReturnValue(new Promise(() => {}));
+    await renderScreen(fake);
     fillValidRenter();
 
     submit();
-    await act(async () => {
-      await jest.advanceTimersByTimeAsync(400);
-    });
+    await settle();
 
     expect(screen.getByRole('header', { name: 'Booking received' })).toBeTruthy();
     expect(screen.getByLabelText('Booking status: Saving…')).toBeTruthy();
-    const savedPromise = repository.getBookings();
-    await wait(SIMULATED_LATENCY_MS);
-    const saved = await savedPromise;
-    expect(saved).toHaveLength(1);
-    expect(saved[0]).toMatchObject({ carId: 'car-05', renterName: 'Mette Frederiksen' });
+    expect(fake.stored()).toHaveLength(1);
+    expect(fake.stored()[0]).toMatchObject({
+      carId: 'car-05',
+      renterName: 'Mette Frederiksen',
+      syncStatus: 'pending',
+    });
   });
 
   it('shows the booking as confirmed once it has synced', async () => {
@@ -176,21 +179,21 @@ describe('BookingScreen', () => {
     fillValidRenter();
 
     submit();
-    await wait(SIMULATED_LATENCY_MS * 2);
+    await settle();
 
     expect(screen.getByLabelText('Booking status: Confirmed')).toBeTruthy();
   });
 
   it('creates only one booking when submit is pressed twice', async () => {
-    const repository = createInMemoryBookingRepository();
-    const createSpy = jest.spyOn(repository, 'createBooking');
-    await renderScreen(repository);
+    const fake = makeBookingRepository();
+    const createSpy = jest.spyOn(fake.repository, 'createBooking');
+    await renderScreen(fake);
     fillValidRenter();
 
     const button = screen.getByRole('button', { name: 'Confirm booking' });
     fireEvent.press(button);
     fireEvent.press(button);
-    await wait(SIMULATED_LATENCY_MS * 2);
+    await settle();
 
     expect(createSpy).toHaveBeenCalledTimes(1);
   });
@@ -210,10 +213,27 @@ describe('BookingScreen', () => {
     const { navigation } = await renderScreen();
     fillValidRenter();
     submit();
-    await wait(SIMULATED_LATENCY_MS * 2);
+    await settle();
 
     fireEvent.press(screen.getByRole('button', { name: 'Back to cars' }));
 
     expect(navigation.popToTop).toHaveBeenCalled();
+  });
+
+  it('saves a booking made offline as pending, and says it will sync', async () => {
+    const fake = makeBookingRepository();
+    fake.postBooking.mockRejectedValue(new ApiNetworkError(new Error('Network request failed')));
+    setOffline();
+    await renderScreen(fake);
+    fillValidRenter();
+
+    submit();
+    await settle();
+
+    expect(screen.getByLabelText('Booking status: Saving…')).toBeTruthy();
+    expect(
+      screen.getByText('Saved on this phone. It will sync when you’re back online.')
+    ).toBeTruthy();
+    expect(fake.stored()[0].syncStatus).toBe('pending');
   });
 });

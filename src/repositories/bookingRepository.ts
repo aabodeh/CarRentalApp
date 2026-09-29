@@ -1,9 +1,11 @@
-import type { Booking } from '../types';
+import { postBooking as postBookingToApi } from '../services/api/bookingApi';
+import { isUnreachable } from '../services/api/client';
+import { bookingStore } from '../storage/bookingStore';
+import type { Booking, Car } from '../types';
 import { calculateTotalPrice } from '../utils/calculateTotalPrice';
 import { todayIsoDate } from '../utils/localDate';
 import { hasErrors, validateBooking, type BookingErrors } from '../utils/validateBooking';
 import { carRepository } from './carRepository';
-import { simulateLatency } from './simulatedLatency';
 
 /** What the UI provides. Everything else on a Booking is decided here, not by the form. */
 export type BookingInput = Pick<
@@ -33,24 +35,46 @@ export class BookingNotFoundError extends Error {
 }
 
 /**
- * The contract every booking data source implements. Today: in memory. Next PR: saved locally
- * first, then sent to the API through the retry queue (K2), with the sync status (K3) tracked here.
+ * The contract every booking source implements. Bookings are saved on the phone first, so
+ * creating one never needs the network; syncing sends it to the API.
  */
 export type BookingRepository = {
   getBookings(): Promise<Booking[]>;
-  /** Validates, prices and saves a booking locally, with `syncStatus: 'pending'`. */
+  /** Validates, prices and saves a booking on the phone, with `syncStatus: 'pending'`. */
   createBooking(input: BookingInput): Promise<Booking>;
   /**
-   * Sends a pending booking to the server. Today it simply settles to `'completed'`.
-   * THE K3 SEAM: the next PR replaces this with the API call and the retry queue.
+   * Sends a pending booking to the API (K3):
+   * - accepted            → `completed`
+   * - server unreachable  → stays `pending`, to be retried (PR 5 adds the retry queue, K2)
+   * - rejected by server  → `failed`
    */
   syncBooking(id: string): Promise<Booking>;
 };
 
-/** A fresh in-memory repository. The app uses the shared instance below; tests make their own. */
-export function createInMemoryBookingRepository(): BookingRepository {
-  let bookings: Booking[] = [];
+type Dependencies = {
+  store: { read(): Promise<Booking[]>; write(bookings: Booking[]): Promise<void> };
+  postBooking: (booking: Booking) => Promise<{ remoteId: string }>;
+  cars: { getCarById(id: string): Promise<Car> };
+};
+
+/** A repository over the given store and API. The app uses the shared instance below. */
+export function createBookingRepository({
+  store,
+  postBooking,
+  cars,
+}: Dependencies): BookingRepository {
+  let bookings: Booking[] | null = null;
   let sequence = 0;
+
+  const load = async (): Promise<Booking[]> => {
+    if (!bookings) bookings = await store.read();
+    return bookings;
+  };
+
+  const save = async (next: Booking[]) => {
+    bookings = next;
+    await store.write(next);
+  };
 
   const newId = () => {
     sequence += 1;
@@ -59,21 +83,19 @@ export function createInMemoryBookingRepository(): BookingRepository {
 
   return {
     async getBookings() {
-      await simulateLatency();
-      return bookings.map((booking) => ({ ...booking }));
+      return (await load()).map((booking) => ({ ...booking }));
     },
 
     async createBooking(input) {
-      // Stamped when the user submits, before any waiting — not when the save happens to finish.
+      // Stamped when the user submits, not when saving happens to finish.
       const createdAt = new Date().toISOString();
       const errors = validateBooking(input, todayIsoDate());
       if (hasErrors(errors)) {
         throw new InvalidBookingError(errors);
       }
 
-      // Look the car up while the simulated latency runs, so creating costs one delay, not two.
-      const [car] = await Promise.all([carRepository.getCarById(input.carId), simulateLatency()]);
-
+      // Cache first, so a car the user has already seen can be booked offline.
+      const car = await cars.getCarById(input.carId);
       const booking: Booking = {
         ...input,
         id: newId(),
@@ -82,21 +104,33 @@ export function createInMemoryBookingRepository(): BookingRepository {
         createdAt,
         syncStatus: 'pending',
       };
-      bookings = [...bookings, booking];
+      await save([...(await load()), booking]);
       return { ...booking };
     },
 
     async syncBooking(id) {
-      await simulateLatency();
-      const existing = bookings.find((booking) => booking.id === id);
+      const existing = (await load()).find((booking) => booking.id === id);
       if (!existing) {
         throw new BookingNotFoundError(id);
       }
-      const synced: Booking = { ...existing, syncStatus: 'completed' };
-      bookings = bookings.map((booking) => (booking.id === id ? synced : booking));
-      return { ...synced };
+
+      let syncStatus: Booking['syncStatus'];
+      try {
+        await postBooking(existing);
+        syncStatus = 'completed';
+      } catch (thrown) {
+        syncStatus = isUnreachable(thrown) ? 'pending' : 'failed';
+      }
+
+      const updated: Booking = { ...existing, syncStatus };
+      await save((await load()).map((booking) => (booking.id === id ? updated : booking)));
+      return { ...updated };
     },
   };
 }
 
-export const bookingRepository: BookingRepository = createInMemoryBookingRepository();
+export const bookingRepository: BookingRepository = createBookingRepository({
+  store: bookingStore,
+  postBooking: postBookingToApi,
+  cars: carRepository,
+});

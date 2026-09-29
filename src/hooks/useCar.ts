@@ -1,55 +1,42 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { CarNotFoundError, carRepository } from '../repositories/carRepository';
+import { carRepository, type CarsEvent, type Freshness } from '../repositories/carRepository';
 import type { Car } from '../types';
-import { toError } from '../utils/toError';
 
 /**
  * Every state a single car can be in. `not-found` is its own status, not a flavour of error:
- * retrying will not make a deleted car appear, so the screen needs a different design for it.
+ * retrying will not make a missing car appear, so the screen needs a different design for it.
  */
 export type CarState =
   | { status: 'loading' }
   | { status: 'not-found' }
   | { status: 'error'; error: Error; retry: () => void }
-  | { status: 'ready'; car: Car };
+  | { status: 'ready'; car: Car; fetchedAt: string; freshness: Freshness };
 
-const LOADING: CarState = { status: 'loading' };
-
+/**
+ * One car, read from the same cached list as the car list (K1). The details screen therefore
+ * always agrees with the list, and any car already seen opens offline.
+ */
 export function useCar(id: string): CarState {
-  // The state remembers which id it belongs to, so switching ids shows `loading` straight away
-  // instead of briefly showing the previous car.
-  const [result, setResult] = useState<{ id: string; state: CarState }>({ id, state: LOADING });
-  const [attempt, setAttempt] = useState(0);
+  const [event, setEvent] = useState<CarsEvent | null>(null);
 
   const retry = useCallback(() => {
-    setResult({ id, state: LOADING });
-    setAttempt((previous) => previous + 1);
-  }, [id]);
+    setEvent(null);
+    void carRepository.refreshCars();
+  }, []);
 
-  useEffect(() => {
-    let cancelled = false;
+  useEffect(() => carRepository.subscribeCars(setEvent), []);
 
-    carRepository.getCarById(id).then(
-      (car) => {
-        if (!cancelled) setResult({ id, state: { status: 'ready', car } });
-      },
-      (thrown: unknown) => {
-        if (cancelled) return;
-        setResult({
-          id,
-          state:
-            thrown instanceof CarNotFoundError
-              ? { status: 'not-found' }
-              : { status: 'error', error: toError(thrown), retry },
-        });
-      }
-    );
-
-    return () => {
-      cancelled = true;
+  return useMemo((): CarState => {
+    if (!event) return { status: 'loading' };
+    if (event.type === 'error') return { status: 'error', error: event.error, retry };
+    const car = event.snapshot.cars.find((candidate) => candidate.id === id);
+    if (!car) return { status: 'not-found' };
+    return {
+      status: 'ready',
+      car,
+      fetchedAt: event.snapshot.fetchedAt,
+      freshness: event.snapshot.freshness,
     };
-  }, [id, attempt, retry]);
-
-  return result.id === id ? result.state : LOADING;
+  }, [event, id, retry]);
 }
