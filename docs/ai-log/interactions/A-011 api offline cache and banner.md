@@ -9,7 +9,7 @@ task: PR 4 — lint/test tooling, MockAPI client with typed errors and guards, A
 prompt_or_link: '[[P8]]'
 verification: TODO (Moha)
 decision: TODO (Moha)
-related_pr:
+related_pr: https://github.com/aabodeh/CarRentalApp/pull/7
 ---
 
 # A-011 — API, offline cache and banner
