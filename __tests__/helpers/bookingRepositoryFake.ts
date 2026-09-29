@@ -1,15 +1,18 @@
 import { cars } from '../../src/data/dummy/cars';
 import { createBookingRepository } from '../../src/repositories/bookingRepository';
+import type { StoredBooking } from '../../src/storage/bookingStore';
 import type { Booking } from '../../src/types';
 
 /**
- * A real booking repository over an in-memory store, with the API call under the test's control.
- * `reply` decides what "the server" does: accept (default), fail to connect, or never answer.
+ * A real booking repository over an in-memory store, with the API under the test's control.
+ * By default the server accepts every booking and has none already.
  */
-export function makeBookingRepository(saved: Booking[] = []) {
+export function makeBookingRepository(saved: StoredBooking[] = []) {
   let stored = saved;
   const postBooking = jest.fn<Promise<{ remoteId: string }>, [Booking]>();
   postBooking.mockResolvedValue({ remoteId: '1' });
+  const findBookingByClientId = jest.fn<Promise<{ remoteId: string } | null>, [string]>();
+  findBookingByClientId.mockResolvedValue(null);
 
   const repository = createBookingRepository({
     store: {
@@ -18,7 +21,7 @@ export function makeBookingRepository(saved: Booking[] = []) {
         stored = next;
       },
     },
-    postBooking,
+    api: { postBooking, findBookingByClientId },
     cars: {
       getCarById: async (id) => {
         const car = cars.find((candidate) => candidate.id === id);
@@ -28,5 +31,5 @@ export function makeBookingRepository(saved: Booking[] = []) {
     },
   });
 
-  return { repository, postBooking, stored: () => stored };
+  return { repository, postBooking, findBookingByClientId, stored: () => stored };
 }
