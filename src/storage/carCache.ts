@@ -2,7 +2,7 @@ import type { Car } from '../types';
 import { isCarArray } from '../types/guards';
 import { readJson, writeJson } from './keyValueStore';
 
-/** K1: the last car list fetched from the API, and when. Key: `carrental.v1.cars`. */
+/** K1: the last car list fetched from the API, and when. Key: `carrental.v2.cars`. */
 export const carCache = {
   async read(): Promise<{ cars: Car[]; fetchedAt: string } | null> {
     const stored = await readJson('cars', isCarArray);

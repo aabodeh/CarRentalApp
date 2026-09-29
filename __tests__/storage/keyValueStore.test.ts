@@ -11,7 +11,7 @@ describe('keyValueStore', () => {
   });
 
   it('namespaces and versions every key', () => {
-    expect(storageKey('cars')).toBe('carrental.v1.cars');
+    expect(storageKey('cars')).toBe('carrental.v2.cars');
   });
 
   it('reads back exactly what it wrote, with the time it was saved', async () => {
@@ -28,26 +28,26 @@ describe('keyValueStore', () => {
   });
 
   it('treats corrupt JSON as nothing stored, and removes it, instead of crashing', async () => {
-    await AsyncStorage.setItem('carrental.v1.cars', '{"version":1,"savedAt":');
+    await AsyncStorage.setItem('carrental.v2.cars', '{"version":1,"savedAt":');
 
     await expect(readJson('cars', isCarArray)).resolves.toBeNull();
-    await expect(AsyncStorage.getItem('carrental.v1.cars')).resolves.toBeNull();
+    await expect(AsyncStorage.getItem('carrental.v2.cars')).resolves.toBeNull();
   });
 
   it('discards data written by a different storage version', async () => {
     await AsyncStorage.setItem(
-      'carrental.v1.cars',
-      JSON.stringify({ version: 2, savedAt: '2026-09-29T10:00:00.000Z', data: cars })
+      'carrental.v2.cars',
+      JSON.stringify({ version: 1, savedAt: '2026-09-29T10:00:00.000Z', data: cars })
     );
 
     await expect(readJson('cars', isCarArray)).resolves.toBeNull();
-    await expect(AsyncStorage.getItem('carrental.v1.cars')).resolves.toBeNull();
+    await expect(AsyncStorage.getItem('carrental.v2.cars')).resolves.toBeNull();
   });
 
   it('discards stored data that no longer has the expected shape', async () => {
     await AsyncStorage.setItem(
-      'carrental.v1.cars',
-      JSON.stringify({ version: 1, savedAt: '2026-09-29T10:00:00.000Z', data: [{ id: 'x' }] })
+      'carrental.v2.cars',
+      JSON.stringify({ version: 2, savedAt: '2026-09-29T10:00:00.000Z', data: [{ id: 'x' }] })
     );
 
     await expect(readJson('cars', isCarArray)).resolves.toBeNull();

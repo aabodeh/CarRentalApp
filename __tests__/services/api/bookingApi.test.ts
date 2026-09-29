@@ -1,5 +1,5 @@
-import { postBooking } from '../../../src/services/api/bookingApi';
-import { ApiPayloadError } from '../../../src/services/api/client';
+import { findBookingByClientId, postBooking } from '../../../src/services/api/bookingApi';
+import { ApiPayloadError, ApiStatusError } from '../../../src/services/api/client';
 import { apiConfig } from '../../../src/services/api/config';
 import type { Booking } from '../../../src/types';
 
@@ -57,5 +57,43 @@ describe('postBooking', () => {
     } as unknown as Response);
 
     await expect(postBooking(booking)).rejects.toThrow(ApiPayloadError);
+  });
+
+  describe('findBookingByClientId', () => {
+    const reply = (status: number, body: unknown) =>
+      ({ ok: status < 300, status, json: async () => body }) as unknown as Response;
+
+    it('finds a booking the server already has, by exact client id', async () => {
+      // MockAPI filters by substring: asking for "booking-1" also returns "booking-12".
+      fetchSpy.mockResolvedValue(
+        reply(200, [
+          { id: '7', clientBookingId: 'booking-12' },
+          { id: '3', clientBookingId: 'booking-1' },
+        ])
+      );
+
+      await expect(findBookingByClientId('booking-1')).resolves.toEqual({ remoteId: '3' });
+      expect(fetchSpy.mock.calls[0][0]).toBe(
+        'https://api.test/v1/bookings?clientBookingId=booking-1'
+      );
+    });
+
+    it('ignores a substring match that is not the same booking', async () => {
+      fetchSpy.mockResolvedValue(reply(200, [{ id: '7', clientBookingId: 'booking-12' }]));
+
+      await expect(findBookingByClientId('booking-1')).resolves.toBeNull();
+    });
+
+    it('reads a 404 as "not on the server", because that is how MockAPI says no match', async () => {
+      fetchSpy.mockResolvedValue(reply(404, 'Not found'));
+
+      await expect(findBookingByClientId('booking-1')).resolves.toBeNull();
+    });
+
+    it('still reports a real server error', async () => {
+      fetchSpy.mockResolvedValue(reply(500, 'boom'));
+
+      await expect(findBookingByClientId('booking-1')).rejects.toBeInstanceOf(ApiStatusError);
+    });
   });
 });
