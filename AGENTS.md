@@ -413,3 +413,7 @@ ids. It had never checked. MockAPI stores pasted data as-is, so all ten cars cam
 **Instead:** until you've observed how a third-party service behaves, document it as "expected,
 unverified". Before wiring in a real endpoint, fetch it once and run the reply through the app's
 own guards. See `docs/ai-log/failures/FL-015 assumed mockapi adds ids to seed.md`.
+
+The same goes for **numbers in documents**. An agent wrote log counts into the report notes that
+would only become true later (FL-016). A number goes into a document only after it has been
+counted, and the command that counted it goes next to it.
