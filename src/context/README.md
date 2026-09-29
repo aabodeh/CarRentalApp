@@ -15,10 +15,12 @@ screen actually needs it.
 ## Today
 
 - `BookingContext.tsx`: `BookingProvider` (mounted in `App.tsx`) and `useBookings()`, which gives
-  `{ bookings, creation, createBooking }`.
+  `{ records, load, creation, notice, createBooking, retryBooking, reload, dismissNotice }`.
+  - `records` are `{ booking, sync }`: each booking with its retry bookkeeping.
+  - The provider **runs the K2 retry queue**: at start, when the app returns to the foreground,
+    when the network comes back, and on the queue's own backoff timer.
+  - `notice` is set when a booking succeeds after a failed attempt, and `SyncToast` shows it (K3).
   - The state transitions are a pure `bookingReducer`, unit-tested without rendering.
-  - `createBooking` saves a pending booking through `bookingRepository`, then syncs it in the
-    background. A booking whose sync fails is marked `failed`, not dropped.
-  - A second `createBooking` while one is in flight returns the same promise. The guard is a ref,
-    not state, because two taps in the same frame both still see `idle` in state.
+  - A second `createBooking` while one is in flight returns the same promise, because a ref guards
+    it.
   - The provider takes an optional `repository` prop for tests.

@@ -17,9 +17,11 @@ Custom React hooks (`useX`) that connect the UI to repositories and context.
 
 - `useNetworkStatus`: `{ isOffline }` from expo-network's OS events. An unknown state counts as
   online.
+- `useMyBookings()`: the user's bookings, newest first, with car names from the cached list, as
+  `loading | error | empty | ready`.
 - `useNow(ms)`: the current time, ticking, for "Updated 5 minutes ago".
 
-**Goes here later:** `useBooking`, `useSyncStatus` — hooks that own
+**Goes here later:** `useSyncStatus` — hooks that own
 loading/error/data state and call a repository.
 
 **Does not go here:** raw network or storage calls. A hook calls a repository;
