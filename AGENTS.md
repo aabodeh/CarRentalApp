@@ -123,6 +123,7 @@ the design document. Update the diagram first, then mirror it in `src/types/`.
 
 - `StyleSheet.create` at the bottom of the file. No inline style objects — they allocate on
   every render and cannot be reused.
+- Inline style objects fail lint in `src/**/*.tsx` (`no-restricted-syntax` in `eslint.config.js`).
 - Every colour, spacing value, radius, font size and animation duration comes from
   `src/theme/`. Nothing in `src/` hard-codes a hex, a size or a duration. If the token you need
   does not exist, add it to the theme (and to its README) rather than inlining it.
@@ -186,6 +187,10 @@ Rules:
   by explicit amounts (`jest.advanceTimersByTimeAsync(SIMULATED_LATENCY_MS)`), inside `act` when
   anything is rendered. Never `runAllTimers`: the loading skeleton pulses forever, so "run every
   timer" never finishes.
+- **Console output fails the test.** Any `console.error` or `console.warn` during a test fails it
+  (`jest.setup.js`). A test that _expects_ a warning opts in with
+  `jest.spyOn(console, 'error').mockImplementation(() => {})` and asserts on the spy. Do not opt in
+  to hide a warning you do not understand; fix the cause (FL-011, FL-012).
 - **Lists in tests.** `FlatList` renders more rows on a timer. A test that renders one uses fake
   timers and calls `act(() => jest.runOnlyPendingTimers())` in `afterEach`. Otherwise the timer can
   fire after the test and log an intermittent `act()` warning (FL-012).

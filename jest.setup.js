@@ -20,3 +20,38 @@
  */
 jest.mock('react-native-worklets', () => require('react-native-worklets/src/mock'));
 require('react-native-reanimated').setUpTests();
+
+/**
+ * Any console.error or console.warn fails the test that produced it.
+ *
+ * Why: warnings passed silently before — an act() warning (FL-012) and a deprecation warning
+ * (FL-011) were only noticed because someone read the output. Now they fail the build.
+ *
+ * How: messages are *recorded*, and the test fails in afterEach with all of them. Throwing inside
+ * console.error itself would not work reliably: React calls it from its own internals, where a
+ * throw gets swallowed or turns into an unrelated error. Recording also catches a warning that
+ * fires after the test's last assertion — the FL-012 case.
+ *
+ * OPT-IN for a test that expects a warning: replace the method with a spy, which bypasses the
+ * recorder, and assert on it:
+ *
+ *     const error = jest.spyOn(console, 'error').mockImplementation(() => {});
+ *     …
+ *     expect(error).toHaveBeenCalledWith(expect.stringContaining('…'));
+ */
+const unexpectedConsole = [];
+
+for (const level of ['error', 'warn']) {
+  const original = console[level];
+  console[level] = (...args) => {
+    unexpectedConsole.push(`console.${level}: ${args.map(String).join(' ')}`);
+    original(...args);
+  };
+}
+
+afterEach(() => {
+  if (unexpectedConsole.length > 0) {
+    const messages = unexpectedConsole.splice(0).join('\n\n');
+    throw new Error(`Unexpected console output (see jest.setup.js to opt in):\n\n${messages}`);
+  }
+});

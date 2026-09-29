@@ -26,6 +26,27 @@ module.exports = defineConfig([
     linterOptions: { noInlineConfig: true },
   },
 
+  /**
+   * No inline style objects in app code (AGENTS.md > Styling). `eslint-plugin-react-native` would
+   * give `no-inline-styles`, but Expo's config does not ship it, so this uses ESLint's own
+   * `no-restricted-syntax`: any object literal inside a *style* attribute (`style`,
+   * `contentContainerStyle`, …) — `{{…}}`, `[styles.a, {…}]`, `cond && {…}`. A value measured at
+   * runtime goes in a memoised object outside the JSX. See docs/ai-log/failures/FL-009.
+   */
+  {
+    files: ['src/**/*.tsx'],
+    rules: {
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector: 'JSXAttribute[name.name=/[sS]tyle$/] ObjectExpression',
+          message:
+            'No inline style objects. Put the style in createStyles()/StyleSheet.create at the bottom of the file.',
+        },
+      ],
+    },
+  },
+
   // Project-wide TypeScript rules. See AGENTS.md > Conventions.
   {
     files: ['**/*.ts', '**/*.tsx'],
