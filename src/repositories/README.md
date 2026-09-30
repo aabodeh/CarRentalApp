@@ -33,12 +33,16 @@ only_. If a swap forces you to edit a screen, the boundary was drawn wrong.
     all is it an error.
   - `refreshCars()` is for pull-to-refresh and retry; concurrent calls share one request.
   - `getCarById(id)` is cache-first, so a car already seen can be booked offline.
-- `bookingRepository.ts`:
-  - `createBooking` validates, prices from the car's rate (never the form) and saves to
-    `storage/` as `pending`. It never needs the network.
-  - `syncBooking` POSTs the booking. Accepted → `completed`. Unreachable (offline, timeout, no
-    URL) → stays `pending`. Rejected by the server → `failed`.
-  - PR 5 adds the retry queue (K2) behind `syncBooking`.
+- `bookingRepository.ts`: bookings stored as `{ booking, sync }`.
+  - `createBooking` validates, prices from the car's rate and saves as `pending`. No network.
+  - `syncBooking(id, now)` is **one attempt**. Before a retry it checks the API for the booking by
+    `clientBookingId` (idempotency). Accepted → `completed`; transient failure → `failed` with the
+    next retry scheduled; refused → `failed`, `rejected`.
+  - `resetForManualRetry(id)` is the user's "Try again".
+- `syncPolicy.ts`: **the K2 rules, in one place**: delays (2 s / 8 s / 30 s), 4 attempts, what is
+  due and what needs a manual retry. It also lists what is deliberately out of scope.
+- `syncQueue.ts`: the engine. It is derived from the stored bookings on every run, makes one
+  attempt at a time, uses one timer, and makes no attempts while offline. `BookingContext` runs it.
 
 Both are built by factories (`createCarRepository`, `createBookingRepository`) with their
 dependencies (API functions, storage) passed in. The app uses one shared instance of each, and

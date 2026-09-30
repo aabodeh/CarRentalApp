@@ -1,20 +1,18 @@
 import { HeaderHeightContext } from '@react-navigation/elements';
-import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { act, fireEvent, render, screen } from '@testing-library/react-native';
 import { AccessibilityInfo, KeyboardAvoidingView, ScrollView } from 'react-native';
 
 import { BookingProvider } from '../../src/context/BookingContext';
 import { cars } from '../../src/data/dummy/cars';
-import type { RootStackParamList } from '../../src/navigation/types';
+import type { CarsStackScreenProps } from '../../src/navigation/types';
 import type { BookingRepository } from '../../src/repositories/bookingRepository';
 import BookingScreen from '../../src/screens/BookingScreen';
-import { ApiNetworkError } from '../../src/services/api/client';
 import { formatPrice } from '../../src/utils/formatPrice';
 import { makeBookingRepository } from '../helpers/bookingRepositoryFake';
 import { stubCarRepository } from '../helpers/carRepositoryStub';
 import { setOffline, setOnline } from '../helpers/network';
 
-type Props = NativeStackScreenProps<RootStackParamList, 'Booking'>;
+type Props = CarsStackScreenProps<'Booking'>;
 
 const tesla = cars.find((car) => car.id === 'car-05')!;
 const HEADER_HEIGHT = 56;
@@ -68,9 +66,10 @@ describe('BookingScreen', () => {
     jest.useFakeTimers({ now: NOW });
   });
 
-  afterEach(() => {
-    act(() => {
-      jest.runOnlyPendingTimers();
+  afterEach(async () => {
+    // Async flush: a pending retry timer starts an async send, which must finish inside act.
+    await act(async () => {
+      await jest.runOnlyPendingTimersAsync();
     });
     jest.useRealTimers();
     jest.restoreAllMocks();
@@ -155,33 +154,23 @@ describe('BookingScreen', () => {
     expect(screen.getByText('Same-day return counts as 1 day.')).toBeTruthy();
   });
 
-  it('creates a pending booking on submit', async () => {
+  it('saves the booking as pending and opens My bookings, where its status is shown', async () => {
     const fake = makeBookingRepository();
     fake.postBooking.mockReturnValue(new Promise(() => {}));
-    await renderScreen(fake);
+    const { navigation } = await renderScreen(fake);
     fillValidRenter();
 
     submit();
     await settle();
 
-    expect(screen.getByRole('header', { name: 'Booking received' })).toBeTruthy();
-    expect(screen.getByLabelText('Booking status: Saving…')).toBeTruthy();
     expect(fake.stored()).toHaveLength(1);
-    expect(fake.stored()[0]).toMatchObject({
+    expect(fake.stored()[0].booking).toMatchObject({
       carId: 'car-05',
       renterName: 'Mette Frederiksen',
       syncStatus: 'pending',
     });
-  });
-
-  it('shows the booking as confirmed once it has synced', async () => {
-    await renderScreen();
-    fillValidRenter();
-
-    submit();
-    await settle();
-
-    expect(screen.getByLabelText('Booking status: Confirmed')).toBeTruthy();
+    expect(navigation.popToTop).toHaveBeenCalled();
+    expect(navigation.navigate).toHaveBeenCalledWith('MyBookingsTab');
   });
 
   it('creates only one booking when submit is pressed twice', async () => {
@@ -209,31 +198,17 @@ describe('BookingScreen', () => {
     expect(screen.UNSAFE_getByType(ScrollView).props.keyboardShouldPersistTaps).toBe('handled');
   });
 
-  it('goes back to the car list from the confirmation', async () => {
-    const { navigation } = await renderScreen();
-    fillValidRenter();
-    submit();
-    await settle();
-
-    fireEvent.press(screen.getByRole('button', { name: 'Back to cars' }));
-
-    expect(navigation.popToTop).toHaveBeenCalled();
-  });
-
-  it('saves a booking made offline as pending, and says it will sync', async () => {
+  it('saves a booking made offline as pending, without trying to send it', async () => {
     const fake = makeBookingRepository();
-    fake.postBooking.mockRejectedValue(new ApiNetworkError(new Error('Network request failed')));
     setOffline();
-    await renderScreen(fake);
+    const { navigation } = await renderScreen(fake);
     fillValidRenter();
 
     submit();
     await settle();
 
-    expect(screen.getByLabelText('Booking status: Saving…')).toBeTruthy();
-    expect(
-      screen.getByText('Saved on this phone. It will sync when you’re back online.')
-    ).toBeTruthy();
-    expect(fake.stored()[0].syncStatus).toBe('pending');
+    expect(fake.stored()[0].booking.syncStatus).toBe('pending');
+    expect(fake.postBooking).not.toHaveBeenCalled();
+    expect(navigation.navigate).toHaveBeenCalledWith('MyBookingsTab');
   });
 });

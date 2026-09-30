@@ -69,11 +69,31 @@ and not inside it. A hook ignores any answer that arrives after it unmounts. See
 
 The NFRs land in specific places:
 
-| NFR              | Where it lives today                                                                                                                                                                | Status |
-| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
-| K1 offline reads | `carRepository` serves `storage/carCache` first, refreshes from `services/api/`, writes back. `useCars` refreshes when the connection returns. `OfflineBanner` + `DataAge` show it. | PR 4   |
-| K2 retry queue   | `bookingRepository.syncBooking` leaves unreachable bookings `pending`. The queue with backoff goes in `storage/` under the reserved key `carrental.v1.sync-queue`.                  | PR 5   |
-| K3 sync status   | `bookingRepository` sets `syncStatus`, `BookingContext` holds it, `SyncStatusBadge` renders it.                                                                                     | PR 3–4 |
+| NFR              | Where it lives                                                                                                                                                                                                                                               | Since  |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------ |
+| K1 offline reads | `carRepository` serves `storage/carCache` first, refreshes from `services/api/`, writes back. `useCars` refreshes when the connection returns. `OfflineBanner` + `DataAge` show it.                                                                          | PR 4   |
+| K2 retry queue   | Rules in `repositories/syncPolicy.ts`; engine in `repositories/syncQueue.ts`, derived from the bookings in `storage/bookingStore` (`{ booking, sync }`). Run by `BookingContext` at start, on foreground, on reconnect and on its backoff timer.             | PR 5   |
+| K3 sync status   | `bookingRepository` sets `syncStatus`; `BookingContext` holds it; `SyncStatusBadge` renders it wherever a booking appears (My bookings), with a line saying what happens next; `SyncToast` announces a success after a failure; a tab badge counts failures. | PR 3–5 |
+
+**The retry queue (K2).** The rules live in one place, `src/repositories/syncPolicy.ts`:
+
+- A booking is saved on the phone first, always. Sending it is a separate step and never blocks
+  the UI.
+- There is no second list: the queue is derived from the stored bookings every time it runs.
+- No attempts are made while offline. Offline bookings wait as `pending` without using up retries.
+- A failed attempt while online (unreachable, timeout, 5xx) is retried after **2 s, 8 s, 30 s**.
+  After 4 attempts it stops, and the user sees **Try again**.
+- A booking the server refuses (4xx, malformed reply) is not retried automatically.
+- Before any _retry_, the repository asks the API whether it already has the booking
+  (`clientBookingId`), so a retry whose earlier attempt did arrive never creates a duplicate.
+- Triggers: app start, app back in the foreground, network back, and the backoff timer.
+
+**Deferred, on purpose (state this in the design document):**
+
+- retries while the app is closed (would need OS background tasks)
+- conflict resolution
+- multi-device sync (two devices retrying one booking at the same moment could still duplicate it)
+- editing or cancelling a booking
 
 **Cache, then refresh.** Every read the user can see offline goes through a repository that:
 
@@ -102,7 +122,7 @@ __tests__/              ALL tests, mirroring the source tree
 src/
   components/           reusable presentational pieces
   screens/              one file per screen
-  navigation/           native-stack navigator + RootStackParamList
+  navigation/           bottom tabs + Cars stack, typed param lists
   context/              React Context providers for cross-screen state
   hooks/                useX hooks connecting UI to repositories
   repositories/         the seam — only layer that knows the data source
@@ -212,6 +232,9 @@ Rules:
 - **Lists in tests.** `FlatList` renders more rows on a timer. A test that renders one uses fake
   timers and calls `act(() => jest.runOnlyPendingTimers())` in `afterEach`. Otherwise the timer can
   fire after the test and log an intermittent `act()` warning (FL-012).
+- **Tests near the retry queue flush timers asynchronously.** A retry timer starts an _async_
+  send, so a synchronous `act` ends before it does. Tests that render `BookingProvider` use
+  `await act(async () => { await jest.runOnlyPendingTimersAsync(); })` in `afterEach`.
 - **Screens that need a provider or navigator context get it in the test.** For example, wrap the
   screen in `BookingProvider repository={createInMemoryBookingRepository()}` and a
   `HeaderHeightContext.Provider`, instead of mocking the hooks.
@@ -390,3 +413,7 @@ ids. It had never checked. MockAPI stores pasted data as-is, so all ten cars cam
 **Instead:** until you've observed how a third-party service behaves, document it as "expected,
 unverified". Before wiring in a real endpoint, fetch it once and run the reply through the app's
 own guards. See `docs/ai-log/failures/FL-015 assumed mockapi adds ids to seed.md`.
+
+The same goes for **numbers in documents**. An agent wrote log counts into the report notes that
+would only become true later (FL-016). A number goes into a document only after it has been
+counted, and the command that counted it goes next to it.

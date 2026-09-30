@@ -1,4 +1,3 @@
-import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useLayoutEffect } from 'react';
 import { useSharedValue } from 'react-native-reanimated';
 
@@ -6,9 +5,9 @@ import CarDetails from '../components/CarDetails';
 import FadingHeaderTitle from '../components/FadingHeaderTitle';
 import CarStateView from '../components/CarStateView';
 import { useCar } from '../hooks/useCar';
-import type { RootStackParamList } from '../navigation/types';
+import type { CarsStackScreenProps } from '../navigation/types';
 
-type Props = NativeStackScreenProps<RootStackParamList, 'CarDetails'>;
+type Props = CarsStackScreenProps<'CarDetails'>;
 
 /** One car, by the `carId` route param. Every state from `useCar` has its own presentation. */
 export default function CarDetailsScreen({ route, navigation }: Props) {

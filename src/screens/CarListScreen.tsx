@@ -1,4 +1,3 @@
-import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useMemo } from 'react';
 import { FlatList, RefreshControl, StyleSheet, View } from 'react-native';
 
@@ -9,10 +8,10 @@ import Skeleton from '../components/Skeleton';
 import StateView from '../components/StateView';
 import { useCars, type CarsState } from '../hooks/useCars';
 import { useTheme } from '../hooks/useTheme';
-import type { RootStackParamList } from '../navigation/types';
+import type { CarsStackScreenProps } from '../navigation/types';
 import { spacing, type ColorTokens } from '../theme';
 
-type Props = NativeStackScreenProps<RootStackParamList, 'CarList'>;
+type Props = CarsStackScreenProps<'CarList'>;
 
 const SKELETON_COUNT = 3;
 

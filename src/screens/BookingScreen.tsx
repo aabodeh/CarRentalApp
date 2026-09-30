@@ -1,5 +1,4 @@
 import { useHeaderHeight } from '@react-navigation/elements';
-import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useMemo, useRef, useState } from 'react';
 import {
   AccessibilityInfo,
@@ -10,13 +9,12 @@ import {
   type TextInput,
 } from 'react-native';
 
-import BookingConfirmation from '../components/BookingConfirmation';
 import BookingForm from '../components/BookingForm';
 import CarStateView from '../components/CarStateView';
 import Screen from '../components/Screen';
 import { useBookings } from '../context/BookingContext';
 import { useCar } from '../hooks/useCar';
-import type { RootStackParamList } from '../navigation/types';
+import type { CarsStackScreenProps } from '../navigation/types';
 import { spacing } from '../theme';
 import { addDays, todayIsoDate } from '../utils/localDate';
 import {
@@ -26,16 +24,19 @@ import {
   type BookingFormValues,
 } from '../utils/validateBooking';
 
-type Props = NativeStackScreenProps<RootStackParamList, 'Booking'>;
+type Props = CarsStackScreenProps<'Booking'>;
 
 const fieldsNeedAttention = (count: number) =>
   `${count} ${count === 1 ? 'field needs' : 'fields need'} attention`;
 
-/** Book one car: the form, then a confirmation whose sync status updates live. */
+/**
+ * Book one car. Once the booking is saved on the phone, the user is taken to My bookings, where its
+ * sync status is shown and followed live (K3) — the status they were promised.
+ */
 export default function BookingScreen({ route, navigation }: Props) {
   const { carId } = route.params;
   const carState = useCar(carId);
-  const { bookings, creation, createBooking } = useBookings();
+  const { creation, createBooking } = useBookings();
   const headerHeight = useHeaderHeight();
 
   const today = useMemo(() => todayIsoDate(), []);
@@ -47,12 +48,10 @@ export default function BookingScreen({ route, navigation }: Props) {
   }));
   // Errors appear after the first submit attempt, then update live as the user fixes them.
   const [showErrors, setShowErrors] = useState(false);
-  const [bookingId, setBookingId] = useState<string | null>(null);
   const nameRef = useRef<TextInput>(null);
   const emailRef = useRef<TextInput>(null);
 
   const errors = showErrors ? validateBooking(values, today) : {};
-  const booking = bookings.find((candidate) => candidate.id === bookingId);
 
   const handleChange = (field: BookingField, value: string) =>
     setValues((previous) => ({ ...previous, [field]: value }));
@@ -73,7 +72,11 @@ export default function BookingScreen({ route, navigation }: Props) {
       startDate: values.startDate,
       endDate: values.endDate,
     }).then(
-      (created) => setBookingId(created.id),
+      () => {
+        // Leave the Cars tab at its list, and show the booking where its status lives.
+        navigation.popToTop();
+        navigation.navigate('MyBookingsTab');
+      },
       // The failure is shown from `creation`; nothing else to do here.
       () => undefined
     );
@@ -97,30 +100,22 @@ export default function BookingScreen({ route, navigation }: Props) {
           keyboardShouldPersistTaps="handled"
           keyboardDismissMode="interactive"
         >
-          {booking ? (
-            <BookingConfirmation
-              car={carState.car}
-              booking={booking}
-              onDone={() => navigation.popToTop()}
-            />
-          ) : (
-            <BookingForm
-              car={carState.car}
-              values={values}
-              onChange={handleChange}
-              errors={errors}
-              today={today}
-              onSubmit={handleSubmit}
-              submitting={creation.status === 'submitting'}
-              submitError={
-                creation.status === 'error'
-                  ? "Couldn't save your booking. Check your details and try again."
-                  : undefined
-              }
-              nameRef={nameRef}
-              emailRef={emailRef}
-            />
-          )}
+          <BookingForm
+            car={carState.car}
+            values={values}
+            onChange={handleChange}
+            errors={errors}
+            today={today}
+            onSubmit={handleSubmit}
+            submitting={creation.status === 'submitting'}
+            submitError={
+              creation.status === 'error'
+                ? "Couldn't save your booking. Check your details and try again."
+                : undefined
+            }
+            nameRef={nameRef}
+            emailRef={emailRef}
+          />
         </ScrollView>
       </KeyboardAvoidingView>
     </Screen>

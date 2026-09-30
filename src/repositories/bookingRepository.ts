@@ -1,11 +1,17 @@
-import { postBooking as postBookingToApi } from '../services/api/bookingApi';
-import { isUnreachable } from '../services/api/client';
-import { bookingStore } from '../storage/bookingStore';
+import {
+  findBookingByClientId as findBookingByClientIdInApi,
+  postBooking as postBookingToApi,
+} from '../services/api/bookingApi';
+import { ApiStatusError, isUnreachable } from '../services/api/client';
+import { bookingStore, type StoredBooking } from '../storage/bookingStore';
 import type { Booking, Car } from '../types';
 import { calculateTotalPrice } from '../utils/calculateTotalPrice';
 import { todayIsoDate } from '../utils/localDate';
 import { hasErrors, validateBooking, type BookingErrors } from '../utils/validateBooking';
 import { carRepository } from './carRepository';
+import { nextRetryAt } from './syncPolicy';
+
+export type { StoredBooking } from '../storage/bookingStore';
 
 /** What the UI provides. Everything else on a Booking is decided here, not by the form. */
 export type BookingInput = Pick<
@@ -35,45 +41,60 @@ export class BookingNotFoundError extends Error {
 }
 
 /**
- * The contract every booking source implements. Bookings are saved on the phone first, so
- * creating one never needs the network; syncing sends it to the API.
+ * The contract every booking source implements. A booking is saved on the phone first (never
+ * needs the network), then sent by the retry queue (src/repositories/syncQueue.ts), one attempt
+ * at a time through `syncBooking`. The rules for *when* to attempt are in syncPolicy.ts.
  */
 export type BookingRepository = {
-  getBookings(): Promise<Booking[]>;
-  /** Validates, prices and saves a booking on the phone, with `syncStatus: 'pending'`. */
-  createBooking(input: BookingInput): Promise<Booking>;
+  getBookings(): Promise<StoredBooking[]>;
+  /** Validates, prices and saves a booking on the phone, `pending`, with no attempts yet. */
+  createBooking(input: BookingInput): Promise<StoredBooking>;
   /**
-   * Sends a pending booking to the API (K3):
-   * - accepted            → `completed`
-   * - server unreachable  → stays `pending`, to be retried (PR 5 adds the retry queue, K2)
-   * - rejected by server  → `failed`
+   * One attempt to get the booking onto the server:
+   * - accepted (or already there) → `completed`
+   * - unreachable / timeout / 5xx → `failed`, next retry scheduled per syncPolicy
+   * - refused (4xx / malformed)   → `failed`, `rejected`, no automatic retry
    */
-  syncBooking(id: string): Promise<Booking>;
+  syncBooking(id: string, now: Date): Promise<StoredBooking>;
+  /** The user's "Try again": back to `pending`, attempts reset. The queue then sends it. */
+  resetForManualRetry(id: string): Promise<StoredBooking>;
 };
 
 type Dependencies = {
-  store: { read(): Promise<Booking[]>; write(bookings: Booking[]): Promise<void> };
-  postBooking: (booking: Booking) => Promise<{ remoteId: string }>;
+  store: { read(): Promise<StoredBooking[]>; write(records: StoredBooking[]): Promise<void> };
+  api: {
+    postBooking(booking: Booking): Promise<{ remoteId: string }>;
+    findBookingByClientId(clientBookingId: string): Promise<{ remoteId: string } | null>;
+  };
   cars: { getCarById(id: string): Promise<Car> };
 };
 
+/** Worth retrying: we never heard from the server, or the server itself had a problem. */
+const isTransient = (error: unknown) =>
+  isUnreachable(error) || (error instanceof ApiStatusError && error.status >= 500);
+
 /** A repository over the given store and API. The app uses the shared instance below. */
-export function createBookingRepository({
-  store,
-  postBooking,
-  cars,
-}: Dependencies): BookingRepository {
-  let bookings: Booking[] | null = null;
+export function createBookingRepository({ store, api, cars }: Dependencies): BookingRepository {
+  let records: StoredBooking[] | null = null;
   let sequence = 0;
 
-  const load = async (): Promise<Booking[]> => {
-    if (!bookings) bookings = await store.read();
-    return bookings;
+  const load = async (): Promise<StoredBooking[]> => {
+    if (!records) records = await store.read();
+    return records;
   };
 
-  const save = async (next: Booking[]) => {
-    bookings = next;
-    await store.write(next);
+  const find = async (id: string): Promise<StoredBooking> => {
+    const record = (await load()).find((candidate) => candidate.booking.id === id);
+    if (!record) throw new BookingNotFoundError(id);
+    return record;
+  };
+
+  const replace = async (updated: StoredBooking) => {
+    records = (await load()).map((record) =>
+      record.booking.id === updated.booking.id ? updated : record
+    );
+    await store.write(records);
+    return updated;
   };
 
   const newId = () => {
@@ -83,7 +104,7 @@ export function createBookingRepository({
 
   return {
     async getBookings() {
-      return (await load()).map((booking) => ({ ...booking }));
+      return [...(await load())];
     },
 
     async createBooking(input) {
@@ -96,41 +117,63 @@ export function createBookingRepository({
 
       // Cache first, so a car the user has already seen can be booked offline.
       const car = await cars.getCarById(input.carId);
-      const booking: Booking = {
-        ...input,
-        id: newId(),
-        // Priced here, from the car's current rate — never trusted from the form.
-        totalPrice: calculateTotalPrice(car.pricePerDay, input.startDate, input.endDate),
-        createdAt,
-        syncStatus: 'pending',
+      const record: StoredBooking = {
+        booking: {
+          ...input,
+          id: newId(),
+          // Priced here, from the car's current rate — never trusted from the form.
+          totalPrice: calculateTotalPrice(car.pricePerDay, input.startDate, input.endDate),
+          createdAt,
+          syncStatus: 'pending',
+        },
+        sync: { attempts: 0, nextRetryAt: null, rejected: false },
       };
-      await save([...(await load()), booking]);
-      return { ...booking };
+      records = [...(await load()), record];
+      await store.write(records);
+      return record;
     },
 
-    async syncBooking(id) {
-      const existing = (await load()).find((booking) => booking.id === id);
-      if (!existing) {
-        throw new BookingNotFoundError(id);
-      }
+    async syncBooking(id, now) {
+      const record = await find(id);
+      if (record.booking.syncStatus === 'completed') return record;
 
-      let syncStatus: Booking['syncStatus'];
+      const attempts = record.sync.attempts + 1;
       try {
-        await postBooking(existing);
-        syncStatus = 'completed';
+        // Idempotency (K2): a previous attempt may have reached the server even though we never
+        // saw the answer. Ask before sending again. A first attempt cannot have been seen yet.
+        const alreadyThere = record.sync.attempts > 0 ? await api.findBookingByClientId(id) : null;
+        if (!alreadyThere) {
+          await api.postBooking(record.booking);
+        }
+        return await replace({
+          booking: { ...record.booking, syncStatus: 'completed' },
+          sync: { attempts, nextRetryAt: null, rejected: false },
+        });
       } catch (thrown) {
-        syncStatus = isUnreachable(thrown) ? 'pending' : 'failed';
+        const retry = isTransient(thrown);
+        return replace({
+          booking: { ...record.booking, syncStatus: 'failed' },
+          sync: {
+            attempts,
+            nextRetryAt: retry ? nextRetryAt(attempts, now) : null,
+            rejected: !retry,
+          },
+        });
       }
+    },
 
-      const updated: Booking = { ...existing, syncStatus };
-      await save((await load()).map((booking) => (booking.id === id ? updated : booking)));
-      return { ...updated };
+    async resetForManualRetry(id) {
+      const record = await find(id);
+      return replace({
+        booking: { ...record.booking, syncStatus: 'pending' },
+        sync: { attempts: 0, nextRetryAt: null, rejected: false },
+      });
     },
   };
 }
 
 export const bookingRepository: BookingRepository = createBookingRepository({
   store: bookingStore,
-  postBooking: postBookingToApi,
+  api: { postBooking: postBookingToApi, findBookingByClientId: findBookingByClientIdInApi },
   cars: carRepository,
 });

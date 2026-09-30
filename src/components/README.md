@@ -35,7 +35,11 @@ above it gets the data from a hook and passes it down.
   `CarDetails`, so it appears on every screen.
 - `DataAge`: "Updated 5 minutes ago" / "Saved copy · updated 2 hours ago".
 - `CarStateView`: the loading / not-found / error view for any screen that loads one car.
-- `BookingForm` / `BookingConfirmation`: the booking screen's two states.
+- `BookingForm`: the booking form.
+- `BookingRow`: one booking in My bookings. Shows the car, dates, total, `SyncStatusBadge`, a line
+  saying what happens next, and **Try again** when only the user can move it on.
+- `SyncToast`: "Your booking for … is confirmed.", shown and announced when a booking succeeds
+  after a failed attempt (K3). It hides itself after `toast.visibleMs`.
 
 **Theme-aware styles.** Colours change with light and dark mode, so a component builds its styles
 with `const createStyles = (colors: ColorTokens) => StyleSheet.create({...})` at the bottom of the

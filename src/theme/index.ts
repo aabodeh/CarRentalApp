@@ -10,6 +10,7 @@ export {
   pressSpring,
   shimmer,
   stagger,
+  toast,
 } from './motion';
 export { opacity } from './opacity';
 export { radii } from './radii';

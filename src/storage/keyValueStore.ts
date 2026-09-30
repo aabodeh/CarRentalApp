@@ -4,7 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
  * The only module that touches AsyncStorage.
  *
  * Every value is stored as JSON in an envelope `{ version, savedAt, data }` under a namespaced,
- * versioned key: `carrental.v1.<name>`. Reading is defensive: data that is corrupt, from another
+ * versioned key: `carrental.v<STORAGE_VERSION>.<name>`. Reading is defensive: data that is corrupt, from another
  * storage version, or no longer the right shape is removed and reads as "nothing stored". Stored
  * data must never be able to crash the app.
  *
@@ -12,7 +12,13 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
  * discarded instead of being misread.
  */
 export const STORAGE_NAMESPACE = 'carrental';
-export const STORAGE_VERSION = 1;
+/**
+ * v1 (PR 4): bookings stored as `Booking[]`.
+ * v2 (PR 5): bookings stored as `{ booking, sync }[]`, carrying retry metadata (K2).
+ * Bumping this discards everything stored under the old version: the car cache refills itself;
+ * v1 bookings existed only in development builds.
+ */
+export const STORAGE_VERSION = 2;
 
 export const storageKey = (name: string) => `${STORAGE_NAMESPACE}.v${STORAGE_VERSION}.${name}`;
 

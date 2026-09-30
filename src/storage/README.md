@@ -22,15 +22,20 @@ it; hooks and context are kept out by review.
   for a missing key, corrupt JSON, another storage version, or data that fails its guard, and
   removes the bad value. **Stored data can never crash the app.** If you change the shape of
   something stored, bump `STORAGE_VERSION`.
-- `carCache.ts`: `carrental.v1.cars`, the last fetched car list and its `fetchedAt` (K1).
-- `bookingStore.ts`: `carrental.v1.bookings`, every booking made on this phone, with its sync
-  status.
+- `carCache.ts`: `carrental.v2.cars`, the last fetched car list and its `fetchedAt` (K1).
+- `bookingStore.ts`: `carrental.v2.bookings`, every booking made on this phone as
+  `{ booking, sync }`. `sync` is the retry bookkeeping (`attempts`, `nextRetryAt`, `rejected`).
+  The K2 retry queue is _derived_ from these records; there is no separate queue key.
 
-| Key                       | Holds                                                               | Since |
-| ------------------------- | ------------------------------------------------------------------- | ----- |
-| `carrental.v1.cars`       | `Car[]` + `fetchedAt`                                               | PR 4  |
-| `carrental.v1.bookings`   | `Booking[]`                                                         | PR 4  |
-| `carrental.v1.sync-queue` | **reserved**: `{ bookingId, attempts, nextAttemptAt, lastError }[]` | PR 5  |
+| Key                     | Holds                                    | Since     |
+| ----------------------- | ---------------------------------------- | --------- |
+| `carrental.v2.cars`     | `Car[]` + `fetchedAt`                    | PR 4 (v1) |
+| `carrental.v2.bookings` | `{ booking: Booking; sync: SyncMeta }[]` | PR 5      |
+
+`STORAGE_VERSION` went from 1 to 2 in PR 5, when the bookings' shape changed. Everything under
+`carrental.v1.*` is ignored from then on and left orphaned. The car cache refills itself; v1
+bookings only ever existed in development builds. The `sync-queue` key reserved in PR 4 was
+dropped in favour of the derived queue.
 
 Tests use the AsyncStorage library's in-memory mock (global, in `jest.setup.js`). Reset it with
 `AsyncStorage.clear()`.

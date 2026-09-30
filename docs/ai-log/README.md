@@ -25,7 +25,7 @@ before the deadline.
 
 ## Index — interactions
 
-Chronological. A-001 to A-007 are from 2026-09-22; A-008 to A-010 are from 2026-09-28; A-011 is from 2026-09-29.
+Chronological. A-001 to A-007 are from 2026-09-22; A-008 to A-010 are from 2026-09-28; A-011 and A-012 are from 2026-09-29.
 
 | ID                                                  | Tool        | Mode    | Area | What                                                                                                             |
 | --------------------------------------------------- | ----------- | ------- | ---- | ---------------------------------------------------------------------------------------------------------------- |
@@ -40,6 +40,7 @@ Chronological. A-001 to A-007 are from 2026-09-22; A-008 to A-010 are from 2026-
 | [[A-009 car repository hook and list screen]]       | Claude Code | agentic | code | Car list: repository, hooks, motion, a11y ([PR #5](https://github.com/aabodeh/CarRentalApp/pull/5))              |
 | [[A-010 details booking flow and context]]          | Claude Code | agentic | code | Details, booking form, BookingContext ([PR #6](https://github.com/aabodeh/CarRentalApp/pull/6))                  |
 | [[A-011 api offline cache and banner]]              | Claude Code | agentic | code | API client, offline cache (K1), offline banner ([PR #7](https://github.com/aabodeh/CarRentalApp/pull/7))         |
+| [[A-012 retry queue my bookings and tabs]]          | Claude Code | agentic | code | Retry queue (K2), My bookings, tabs, toast (K3) ([PR #9](https://github.com/aabodeh/CarRentalApp/pull/9))        |
 
 ## Index — failures
 
@@ -60,6 +61,7 @@ Chronological. A-001 to A-007 are from 2026-09-22; A-008 to A-010 are from 2026-
 | [[FL-013 repository contract not designed for k1]]               | A-009        | Single-shot `Promise<Car[]>` repository contract could not express K1's cache-then-refresh               | Plan-time review in A-011                               |
 | [[FL-014 invented support path in copy]]                         | A-011        | Failed-booking copy said "Please contact us"; the app has no contact channel                             | AI self-review; nothing else would have                 |
 | [[FL-015 assumed mockapi adds ids to seed]]                      | A-011        | Seed shipped without ids; docs claimed MockAPI adds them. It doesn't, so all 10 cars failed validation   | Checking the real `/cars` reply against the app's guard |
+| [[FL-016 report notes stated counts not yet true]]               | A-012        | Report notes gave log counts (12/16) that did not exist yet (11/15)                                      | AI self-review before commit                            |
 
 Add more as they happen.
 
@@ -67,16 +69,17 @@ Add more as they happen.
 
 Long prompts live in `prompts/` and are wiki-linked from the entries that produced and consumed them.
 
-|                                      | Drafted in     | Used in |
-| ------------------------------------ | -------------- | ------- |
-| [[P1]] — initial setup prompt        | A-001          | A-003   |
-| [[P2]] — plan review changes         | A-002          | A-003   |
-| [[P3]] — repo configuration prompt   | A-004          | A-005   |
-| [[P4]] — AI dossier backfill prompt  | A-006          | A-007   |
-| [[P5]] — PR 1 foundation prompt      | pasted by Moha | A-008   |
-| [[P6]] — PR 2 car list prompt        | pasted by Moha | A-009   |
-| [[P7]] — PR 3 booking flow prompt    | pasted by Moha | A-010   |
-| [[P8]] — PR 4 API and offline prompt | pasted by Moha | A-011   |
+|                                                  | Drafted in     | Used in |
+| ------------------------------------------------ | -------------- | ------- |
+| [[P1]] — initial setup prompt                    | A-001          | A-003   |
+| [[P2]] — plan review changes                     | A-002          | A-003   |
+| [[P3]] — repo configuration prompt               | A-004          | A-005   |
+| [[P4]] — AI dossier backfill prompt              | A-006          | A-007   |
+| [[P5]] — PR 1 foundation prompt                  | pasted by Moha | A-008   |
+| [[P6]] — PR 2 car list prompt                    | pasted by Moha | A-009   |
+| [[P7]] — PR 3 booking flow prompt                | pasted by Moha | A-010   |
+| [[P8]] — PR 4 API and offline prompt             | pasted by Moha | A-011   |
+| [[P9]] — PR 5 retry queue and My bookings prompt | pasted by Moha | A-012   |
 
 ## Reading this vault in Obsidian
 

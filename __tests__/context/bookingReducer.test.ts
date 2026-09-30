@@ -1,87 +1,99 @@
 import { bookingReducer, initialBookingState } from '../../src/context/BookingContext';
-import type { Booking } from '../../src/types';
+import type { StoredBooking } from '../../src/storage/bookingStore';
 
-const pending: Booking = {
-  id: 'booking-1',
-  carId: 'car-05',
-  renterName: 'Mette',
-  renterEmail: 'mette@example.dk',
-  startDate: '2026-10-01',
-  endDate: '2026-10-03',
-  totalPrice: 1498,
-  createdAt: '2026-09-28T08:00:00.000Z',
-  syncStatus: 'pending',
-};
+const record = (
+  syncStatus: StoredBooking['booking']['syncStatus'],
+  attempts = 0,
+  id = 'booking-1'
+): StoredBooking => ({
+  booking: {
+    id,
+    carId: '5',
+    renterName: 'Mette',
+    renterEmail: 'mette@example.dk',
+    startDate: '2026-10-01',
+    endDate: '2026-10-03',
+    totalPrice: 1498,
+    createdAt: '2026-09-28T08:00:00.000Z',
+    syncStatus,
+  },
+  sync: { attempts, nextRetryAt: null, rejected: false },
+});
 
 describe('bookingReducer', () => {
-  it('starts with no bookings and nothing in flight', () => {
-    expect(initialBookingState).toEqual({ bookings: [], creation: { status: 'idle' } });
-  });
-
-  it('marks creation as submitting when it starts', () => {
-    const state = bookingReducer(initialBookingState, { type: 'create/start' });
-    expect(state.creation).toEqual({ status: 'submitting' });
-  });
-
-  it('adds the new booking and returns to idle when creation succeeds', () => {
-    const submitting = bookingReducer(initialBookingState, { type: 'create/start' });
-    const state = bookingReducer(submitting, { type: 'create/success', booking: pending });
-
-    expect(state).toEqual({ bookings: [pending], creation: { status: 'idle' } });
-  });
-
-  it('keeps the error when creation fails, and adds nothing', () => {
-    const error = new Error('offline');
-    const state = bookingReducer(initialBookingState, { type: 'create/failure', error });
-
-    expect(state).toEqual({ bookings: [], creation: { status: 'error', error } });
-  });
-
-  it('replaces a booking with its synced version', () => {
-    const withBooking = bookingReducer(initialBookingState, {
-      type: 'create/success',
-      booking: pending,
+  it('starts loading, with no bookings, nothing in flight and no notice', () => {
+    expect(initialBookingState).toEqual({
+      records: [],
+      load: { status: 'loading' },
+      creation: { status: 'idle' },
+      notice: null,
     });
-    const synced = { ...pending, syncStatus: 'completed' as const };
-
-    const state = bookingReducer(withBooking, { type: 'sync/settled', booking: synced });
-
-    expect(state.bookings).toEqual([synced]);
   });
 
-  it('marks a booking as failed when its sync fails, keeping it rather than dropping it', () => {
-    const withBooking = bookingReducer(initialBookingState, {
-      type: 'create/success',
-      booking: pending,
-    });
-
-    const state = bookingReducer(withBooking, { type: 'sync/failed', bookingId: 'booking-1' });
-
-    expect(state.bookings).toEqual([{ ...pending, syncStatus: 'failed' }]);
-  });
-
-  it('leaves other bookings alone when one settles', () => {
-    const other = { ...pending, id: 'booking-2' };
-    const state = bookingReducer(
-      { bookings: [pending, other], creation: { status: 'idle' } },
-      { type: 'sync/settled', booking: { ...pending, syncStatus: 'completed' } }
-    );
-
-    expect(state.bookings[1]).toBe(other);
-  });
-
-  it('adds bookings saved in an earlier session, keeping ones created since launch', () => {
-    const saved = { ...pending, id: 'booking-saved' };
+  it('shows the saved bookings once loaded, keeping any created since launch', () => {
     const createdNow = bookingReducer(initialBookingState, {
       type: 'create/success',
-      booking: pending,
+      record: record('pending', 0, 'new'),
     });
 
     const state = bookingReducer(createdNow, {
-      type: 'bookings/loaded',
-      bookings: [saved, pending],
+      type: 'records/loaded',
+      records: [record('completed', 1, 'saved')],
     });
 
-    expect(state.bookings).toEqual([saved, pending]);
+    expect(state.records.map((r) => r.booking.id)).toEqual(['saved', 'new']);
+    expect(state.load).toEqual({ status: 'ready' });
+  });
+
+  it('reports a failed load', () => {
+    const error = new Error('disk');
+
+    expect(bookingReducer(initialBookingState, { type: 'records/failed', error }).load).toEqual({
+      status: 'error',
+      error,
+    });
+  });
+
+  it('tracks creation from submitting to idle, or to an error', () => {
+    const submitting = bookingReducer(initialBookingState, { type: 'create/start' });
+    expect(submitting.creation).toEqual({ status: 'submitting' });
+
+    const error = new Error('invalid');
+    expect(bookingReducer(submitting, { type: 'create/failure', error }).creation).toEqual({
+      status: 'error',
+      error,
+    });
+  });
+
+  it('replaces a booking with its updated version', () => {
+    const withBooking = { ...initialBookingState, records: [record('pending')] };
+
+    const state = bookingReducer(withBooking, {
+      type: 'record/updated',
+      record: record('failed', 1),
+    });
+
+    expect(state.records).toEqual([record('failed', 1)]);
+  });
+
+  it('raises a notice when a booking succeeds after a failed attempt', () => {
+    const withBooking = { ...initialBookingState, records: [record('failed', 1)] };
+
+    const state = bookingReducer(withBooking, {
+      type: 'record/updated',
+      record: record('completed', 2),
+    });
+
+    expect(state.notice).toEqual(record('completed', 2));
+    expect(bookingReducer(state, { type: 'notice/dismissed' }).notice).toBeNull();
+  });
+
+  it('raises no notice when a booking succeeds at the first attempt', () => {
+    const state = bookingReducer(
+      { ...initialBookingState, records: [record('pending')] },
+      { type: 'record/updated', record: record('completed', 1) }
+    );
+
+    expect(state.notice).toBeNull();
   });
 });

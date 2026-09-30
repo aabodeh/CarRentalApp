@@ -1,15 +1,14 @@
-import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { act, fireEvent, render, screen } from '@testing-library/react-native';
 
 import { cars } from '../../src/data/dummy/cars';
-import type { RootStackParamList } from '../../src/navigation/types';
+import type { CarsStackScreenProps } from '../../src/navigation/types';
 import CarDetailsScreen from '../../src/screens/CarDetailsScreen';
 import { formatPrice } from '../../src/utils/formatPrice';
 import { OFFLINE_TITLE } from '../../src/components/OfflineBanner';
 import { stubCarRepository } from '../helpers/carRepositoryStub';
 import { setOffline, setOnline } from '../helpers/network';
 
-type Props = NativeStackScreenProps<RootStackParamList, 'CarDetails'>;
+type Props = CarsStackScreenProps<'CarDetails'>;
 
 const tesla = cars.find((car) => car.id === 'car-05')!;
 const unavailable = cars.find((car) => !car.available)!;
