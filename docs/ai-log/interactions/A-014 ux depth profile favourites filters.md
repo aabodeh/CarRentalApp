@@ -9,7 +9,7 @@ task: PR 7 — four icon tabs, a local UserProfile that prefills the booking for
 prompt_or_link: '[[P11]]'
 verification: TODO (Moha)
 decision: TODO (Moha)
-related_pr:
+related_pr: https://github.com/aabodeh/CarRentalApp/pull/11
 ---
 
 # A-014 — UX depth: profile, favourites, filters
