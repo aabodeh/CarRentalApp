@@ -25,22 +25,23 @@ before the deadline.
 
 ## Index — interactions
 
-Chronological. A-001 to A-007 are from 2026-09-22; A-008 to A-010 are from 2026-09-28; A-011 and A-012 are from 2026-09-29.
+Chronological. A-001 to A-007 are from 2026-09-22; A-008 to A-010 are from 2026-09-28; A-011 and A-012 are from 2026-09-29; A-013 is from 2026-09-30.
 
-| ID                                                  | Tool        | Mode    | Area | What                                                                                                             |
-| --------------------------------------------------- | ----------- | ------- | ---- | ---------------------------------------------------------------------------------------------------------------- |
-| [[A-001 course context and initial setup prompt]]   | Claude chat | chat    | docs | Course context from the Drive materials, repo review, drafting the setup prompt [[P1]]                           |
-| [[A-002 setup plan review]]                         | Claude chat | chat    | code | Reviewing Claude Code's setup plan before execution; produced [[P2]]                                             |
-| [[A-003 project setup scaffolding]]                 | Claude Code | agentic | code | Tooling, folder skeleton, AGENTS.md, this vault, CI ([PR #1](https://github.com/aabodeh/CarRentalApp/pull/1))    |
-| [[A-004 setup review and repo config prompt]]       | Claude chat | chat    | code | Reviewing the setup result; drafting [[P3]]                                                                      |
-| [[A-005 repo configuration and expo patch]]         | Claude Code | agentic | code | CI check, branch protection handoff, expo patch ([PR #2](https://github.com/aabodeh/CarRentalApp/pull/2))        |
-| [[A-006 ai log backfill prompt]]                    | Claude chat | chat    | docs | Drafting the backfill prompt [[P4]]                                                                              |
-| [[A-007 ai log backfill]]                           | Claude Code | agentic | docs | This chronological backfill ([PR #3](https://github.com/aabodeh/CarRentalApp/pull/3))                            |
-| [[A-008 domain types design system and dummy data]] | Claude Code | agentic | code | PR 1 foundation: types, tokens, a11y rules, dummy cars ([PR #4](https://github.com/aabodeh/CarRentalApp/pull/4)) |
-| [[A-009 car repository hook and list screen]]       | Claude Code | agentic | code | Car list: repository, hooks, motion, a11y ([PR #5](https://github.com/aabodeh/CarRentalApp/pull/5))              |
-| [[A-010 details booking flow and context]]          | Claude Code | agentic | code | Details, booking form, BookingContext ([PR #6](https://github.com/aabodeh/CarRentalApp/pull/6))                  |
-| [[A-011 api offline cache and banner]]              | Claude Code | agentic | code | API client, offline cache (K1), offline banner ([PR #7](https://github.com/aabodeh/CarRentalApp/pull/7))         |
-| [[A-012 retry queue my bookings and tabs]]          | Claude Code | agentic | code | Retry queue (K2), My bookings, tabs, toast (K3) ([PR #9](https://github.com/aabodeh/CarRentalApp/pull/9))        |
+| ID                                                  | Tool        | Mode    | Area | What                                                                                                                        |
+| --------------------------------------------------- | ----------- | ------- | ---- | --------------------------------------------------------------------------------------------------------------------------- |
+| [[A-001 course context and initial setup prompt]]   | Claude chat | chat    | docs | Course context from the Drive materials, repo review, drafting the setup prompt [[P1]]                                      |
+| [[A-002 setup plan review]]                         | Claude chat | chat    | code | Reviewing Claude Code's setup plan before execution; produced [[P2]]                                                        |
+| [[A-003 project setup scaffolding]]                 | Claude Code | agentic | code | Tooling, folder skeleton, AGENTS.md, this vault, CI ([PR #1](https://github.com/aabodeh/CarRentalApp/pull/1))               |
+| [[A-004 setup review and repo config prompt]]       | Claude chat | chat    | code | Reviewing the setup result; drafting [[P3]]                                                                                 |
+| [[A-005 repo configuration and expo patch]]         | Claude Code | agentic | code | CI check, branch protection handoff, expo patch ([PR #2](https://github.com/aabodeh/CarRentalApp/pull/2))                   |
+| [[A-006 ai log backfill prompt]]                    | Claude chat | chat    | docs | Drafting the backfill prompt [[P4]]                                                                                         |
+| [[A-007 ai log backfill]]                           | Claude Code | agentic | docs | This chronological backfill ([PR #3](https://github.com/aabodeh/CarRentalApp/pull/3))                                       |
+| [[A-008 domain types design system and dummy data]] | Claude Code | agentic | code | PR 1 foundation: types, tokens, a11y rules, dummy cars ([PR #4](https://github.com/aabodeh/CarRentalApp/pull/4))            |
+| [[A-009 car repository hook and list screen]]       | Claude Code | agentic | code | Car list: repository, hooks, motion, a11y ([PR #5](https://github.com/aabodeh/CarRentalApp/pull/5))                         |
+| [[A-010 details booking flow and context]]          | Claude Code | agentic | code | Details, booking form, BookingContext ([PR #6](https://github.com/aabodeh/CarRentalApp/pull/6))                             |
+| [[A-011 api offline cache and banner]]              | Claude Code | agentic | code | API client, offline cache (K1), offline banner ([PR #7](https://github.com/aabodeh/CarRentalApp/pull/7))                    |
+| [[A-012 retry queue my bookings and tabs]]          | Claude Code | agentic | code | Retry queue (K2), My bookings, tabs, toast (K3) ([PR #9](https://github.com/aabodeh/CarRentalApp/pull/9))                   |
+| [[A-013 hand-in preparation]]                       | Claude Code | agentic | docs | Hand-in: README, requirements table, report notes, video script ([PR #10](https://github.com/aabodeh/CarRentalApp/pull/10)) |
 
 ## Index — failures
 
@@ -62,6 +63,9 @@ Chronological. A-001 to A-007 are from 2026-09-22; A-008 to A-010 are from 2026-
 | [[FL-014 invented support path in copy]]                         | A-011        | Failed-booking copy said "Please contact us"; the app has no contact channel                             | AI self-review; nothing else would have                 |
 | [[FL-015 assumed mockapi adds ids to seed]]                      | A-011        | Seed shipped without ids; docs claimed MockAPI adds them. It doesn't, so all 10 cars failed validation   | Checking the real `/cars` reply against the app's guard |
 | [[FL-016 report notes stated counts not yet true]]               | A-012        | Report notes gave log counts (12/16) that did not exist yet (11/15)                                      | AI self-review before commit                            |
+| [[FL-017 committed before reading the check]]                    | A-013        | Commit chained with `;` went through after `tsc` failed                                                  | The typecheck output, read after the commit             |
+| [[FL-018 report notes cited an uncounted line total]]            | A-013        | Report notes said "10 lines out of 1,059"; the real total was 298                                        | AI self-review before commit                            |
+| [[FL-019 device script promised a toast that never shows]]       | A-012        | PR #9's device script said a manual retry shows the toast; it does not                                   | A throwaway test, while writing the video script        |
 
 Add more as they happen.
 
@@ -80,6 +84,7 @@ Long prompts live in `prompts/` and are wiki-linked from the entries that produc
 | [[P7]] — PR 3 booking flow prompt                | pasted by Moha | A-010   |
 | [[P8]] — PR 4 API and offline prompt             | pasted by Moha | A-011   |
 | [[P9]] — PR 5 retry queue and My bookings prompt | pasted by Moha | A-012   |
+| [[P10]] — PR 6 hand-in preparation prompt        | pasted by Moha | A-013   |
 
 ## Reading this vault in Obsidian
 

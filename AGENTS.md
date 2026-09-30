@@ -417,3 +417,23 @@ own guards. See `docs/ai-log/failures/FL-015 assumed mockapi adds ids to seed.md
 The same goes for **numbers in documents**. An agent wrote log counts into the report notes that
 would only become true later (FL-016). A number goes into a document only after it has been
 counted, and the command that counted it goes next to it.
+
+### A commit is the result of a passing check, not something next to one
+
+Twice an agent ran a check and a commit in one shell command joined by `;`. The check failed and
+the commit happened anyway (`expo-doctor` in PR 5, `tsc` in the hand-in PR).
+
+**Instead:** `npm run check && git commit …`. Use `&&`, and the full check, not one tool.
+See `docs/ai-log/failures/FL-017 committed before reading the check.md`.
+
+### After writing a document, do a numbers pass
+
+FL-016's rule ("count it before you write it") did not stop an agent writing "10 lines out of
+1,059" the next day; the real total was 298. What caught it was rereading the finished document
+looking only at the numbers and naming the command behind each one.
+
+**Instead:** do that pass every time, and put the command next to the number. Where a number can be
+checked by a test, check it: `__tests__/docs/requirementsCoverage.test.ts` does this for the
+requirements table. The same goes for **test instructions**: a device script states an outcome only
+if a test or a run has shown it (FL-019).
+See `docs/ai-log/failures/FL-018 report notes cited an uncounted line total.md`.
