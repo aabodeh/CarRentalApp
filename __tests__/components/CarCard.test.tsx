@@ -53,3 +53,33 @@ describe('CarCard', () => {
     expect(onPress).toHaveBeenCalledWith('car-05');
   });
 });
+
+describe('CarCard heart', () => {
+  it('shows no heart unless the screen can save cars', () => {
+    render(<CarCard car={tesla} index={0} onPress={jest.fn()} />);
+
+    expect(screen.queryByRole('button', { name: 'Save Tesla Model 3' })).toBeNull();
+  });
+
+  it('saves the car from the heart, separately from opening it', () => {
+    const onPress = jest.fn();
+    const onToggleSaved = jest.fn();
+    render(<CarCard car={tesla} index={0} onPress={onPress} onToggleSaved={onToggleSaved} />);
+
+    fireEvent.press(screen.getByRole('button', { name: 'Save Tesla Model 3' }));
+
+    expect(onToggleSaved).toHaveBeenCalledWith('car-05');
+    expect(onPress).not.toHaveBeenCalled();
+  });
+
+  it('lets an unavailable car be saved for later', () => {
+    const onToggleSaved = jest.fn();
+    render(<CarCard car={mercedes} index={0} onPress={jest.fn()} onToggleSaved={onToggleSaved} />);
+
+    fireEvent.press(
+      screen.getByRole('button', { name: 'Save Mercedes-Benz C 200 Coupé AMG Line' })
+    );
+
+    expect(onToggleSaved).toHaveBeenCalledWith('car-09');
+  });
+});

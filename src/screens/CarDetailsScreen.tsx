@@ -5,6 +5,7 @@ import CarDetails from '../components/CarDetails';
 import FadingHeaderTitle from '../components/FadingHeaderTitle';
 import CarStateView from '../components/CarStateView';
 import { useCar } from '../hooks/useCar';
+import { useFavourites } from '../hooks/useFavourites';
 import type { CarsStackScreenProps } from '../navigation/types';
 
 type Props = CarsStackScreenProps<'CarDetails'>;
@@ -13,6 +14,7 @@ type Props = CarsStackScreenProps<'CarDetails'>;
 export default function CarDetailsScreen({ route, navigation }: Props) {
   const { carId } = route.params;
   const state = useCar(carId);
+  const favourites = useFavourites();
   const scrollY = useSharedValue(0);
   // Until the name block is measured, keep the header title hidden.
   const titleThreshold = useSharedValue(Number.MAX_SAFE_INTEGER);
@@ -39,6 +41,8 @@ export default function CarDetailsScreen({ route, navigation }: Props) {
       scrollY={scrollY}
       titleThreshold={titleThreshold}
       onBook={() => navigation.navigate('Booking', { carId })}
+      saved={favourites.ids.has(carId)}
+      onToggleSaved={() => favourites.toggle(carId)}
     />
   );
 }

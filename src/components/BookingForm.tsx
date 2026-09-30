@@ -24,6 +24,8 @@ export type BookingFormProps = {
   submitError?: string;
   nameRef: RefObject<TextInput | null>;
   emailRef: RefObject<TextInput | null>;
+  /** The name and email are still the profile's: says so above them. */
+  fromProfile?: boolean;
 };
 
 /** The booking form: who is renting, when, and what it will cost. Presentational only. */
@@ -38,6 +40,7 @@ export default function BookingForm({
   submitError,
   nameRef,
   emailRef,
+  fromProfile = false,
 }: BookingFormProps) {
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
@@ -54,6 +57,9 @@ export default function BookingForm({
         </Text>
       </View>
 
+      {fromProfile ? (
+        <Text style={styles.hint}>Filled in from your profile. You can change them here.</Text>
+      ) : null}
       <TextField
         ref={nameRef}
         label="Your name"

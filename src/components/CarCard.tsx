@@ -20,12 +20,17 @@ import {
 import type { Car } from '../types';
 import { FUEL_LABEL, TRANSMISSION_LABEL, UNAVAILABLE_TEXT } from '../utils/carLabels';
 import { formatPrice } from '../utils/formatPrice';
+import FavouriteButton from './FavouriteButton';
 
 export type CarCardProps = {
   car: Car;
   /** Position in the list. Drives the staggered entrance. */
   index: number;
   onPress: (carId: string) => void;
+  /** Whether the car is saved. Only used together with `onToggleSaved`. */
+  saved?: boolean;
+  /** Shows the heart. Without it the card has no heart, e.g. where saving makes no sense. */
+  onToggleSaved?: (carId: string) => void;
 };
 
 /**
@@ -44,9 +49,17 @@ export function carAccessibilityLabel(car: Car): string {
 
 /**
  * A car in the catalogue: photo, name, metadata, price. Pressing opens its details; an unavailable
- * car is dimmed, says so, and cannot be pressed.
+ * car is dimmed, says so, and cannot be pressed. It can still be saved: the heart sits *beside*
+ * the card's button, laid over the photo, because a control inside an accessible button is
+ * unreachable for VoiceOver.
  */
-export default function CarCard({ car, index, onPress }: CarCardProps) {
+export default function CarCard({
+  car,
+  index,
+  onPress,
+  saved = false,
+  onToggleSaved,
+}: CarCardProps) {
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const reduceMotion = useReducedMotion();
@@ -118,6 +131,15 @@ export default function CarCard({ car, index, onPress }: CarCardProps) {
           </View>
         </Pressable>
       </Animated.View>
+      {onToggleSaved ? (
+        <View style={styles.favourite}>
+          <FavouriteButton
+            carName={`${car.make} ${car.model}`}
+            saved={saved}
+            onToggle={() => onToggleSaved(car.id)}
+          />
+        </View>
+      ) : null}
     </Animated.View>
   );
 }
@@ -130,6 +152,11 @@ const createStyles = (colors: ColorTokens) =>
       backgroundColor: colors.surface,
       borderWidth: StyleSheet.hairlineWidth,
       borderColor: colors.hairline,
+    },
+    favourite: {
+      position: 'absolute',
+      top: spacing.md,
+      right: spacing.md,
     },
     image: {
       aspectRatio: 4 / 3,

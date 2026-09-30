@@ -6,6 +6,7 @@ import CarDetailsScreen from '../../src/screens/CarDetailsScreen';
 import { formatPrice } from '../../src/utils/formatPrice';
 import { OFFLINE_TITLE } from '../../src/components/OfflineBanner';
 import { stubCarRepository } from '../helpers/carRepositoryStub';
+import { stubFavourites } from '../helpers/favouritesStub';
 import { setOffline, setOnline } from '../helpers/network';
 
 type Props = CarsStackScreenProps<'CarDetails'>;
@@ -146,5 +147,36 @@ describe('CarDetailsScreen', () => {
     expect(await screen.findByRole('header', { name: 'Tesla Model 3' })).toBeTruthy();
     expect(screen.getByText(OFFLINE_TITLE)).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Book this car' })).toBeEnabled();
+  });
+});
+
+describe('CarDetailsScreen heart', () => {
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it('saves the car from the heart next to its name, and shows it as saved', async () => {
+    const favourites = stubFavourites();
+    const repo = stubCarRepository();
+    renderScreen('car-05');
+    repo.emitCars(cars);
+
+    await act(async () => {
+      fireEvent.press(await screen.findByRole('button', { name: 'Save Tesla Model 3' }));
+    });
+
+    expect(screen.getByRole('button', { name: 'Remove Tesla Model 3 from saved' })).toBeSelected();
+    expect(favourites.stored()).toEqual(['car-05']);
+  });
+
+  it('shows a car saved earlier as saved', async () => {
+    stubFavourites(['car-05']);
+    const repo = stubCarRepository();
+    renderScreen('car-05');
+    repo.emitCars(cars);
+
+    expect(
+      await screen.findByRole('button', { name: 'Remove Tesla Model 3 from saved' })
+    ).toBeSelected();
   });
 });
