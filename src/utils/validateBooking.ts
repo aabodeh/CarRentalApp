@@ -1,4 +1,5 @@
 import { parseIsoDate } from './parseIsoDate';
+import { validateRenter } from './validateRenter';
 
 /** What the booking form collects. Dates are `YYYY-MM-DD`. */
 export type BookingFormValues = {
@@ -21,12 +22,6 @@ export const BOOKING_FIELDS: readonly BookingField[] = [
   'endDate',
 ];
 
-/**
- * Deliberately loose: something@something.something, no spaces. The only real check of an email
- * address is sending mail to it; this only catches typos like a missing "@" or domain.
- */
-const EMAIL_SHAPE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
 const isRealDate = (value: string) => {
   try {
     parseIsoDate(value);
@@ -44,18 +39,8 @@ const isRealDate = (value: string) => {
  * clock. ISO dates compare correctly as strings, so no Date objects are needed here.
  */
 export function validateBooking(values: BookingFormValues, today: string): BookingErrors {
-  const errors: BookingErrors = {};
-
-  if (values.renterName.trim() === '') {
-    errors.renterName = 'Enter your name.';
-  }
-
-  const email = values.renterEmail.trim();
-  if (email === '') {
-    errors.renterEmail = 'Enter your email address.';
-  } else if (!EMAIL_SHAPE.test(email)) {
-    errors.renterEmail = 'Enter a valid email address, like name@example.com.';
-  }
+  // Name and email follow the same rules as the profile form.
+  const errors: BookingErrors = validateRenter(values);
 
   const startValid = isRealDate(values.startDate);
   const endValid = isRealDate(values.endDate);
