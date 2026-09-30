@@ -9,7 +9,7 @@ task: PR 6 — hand-in material: README for a first-time reader, requirements-to
 prompt_or_link: '[[P10]]'
 verification: TODO (Moha)
 decision: TODO (Moha)
-related_pr:
+related_pr: https://github.com/aabodeh/CarRentalApp/pull/10
 ---
 
 # A-013 — hand-in preparation
