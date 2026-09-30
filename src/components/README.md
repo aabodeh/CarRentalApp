@@ -41,6 +41,23 @@ above it gets the data from a hook and passes it down.
 - `SyncToast`: "Your booking for … is confirmed.", shown and announced when a booking succeeds
   after a failed attempt (K3). It hides itself after `toast.visibleMs`.
 
+- `FavouriteButton`: the heart. Its label changes with its state ("Save …" / "Remove … from
+  saved"), with `selected`, a selection haptic, and a spring that is skipped on reduce motion. On
+  `CarCard` it sits beside the card's button, not inside it.
+- `FilterChip`: a multi-select (`checkbox`) or single-select (`radio`) pill. On shows as an
+  inverted fill and a check mark.
+- `SearchField`: a visible label, and a "Clear search" control.
+- `CarFilters`: search, fuel and transmission chips, and the "Showing 3 of 10 cars" line.
+- `ScreenTitle`: the editorial title the Saved and Profile tabs open with.
+- `TextButton`: a quiet, ≥44pt secondary action.
+- `TabIcon` / `TabLabel`: a tab's icon (outline or filled) and its label (medium or bold, with an
+  accent bar).
+- `ProfileForm`, `ProfileStats` (reuses `SpecGrid`), `LocalOnlyNote`: the Profile screen's parts.
+- `StateView` takes an optional decorative `icon`.
+
+**Icons** come from `@expo/vector-icons/Ionicons` only, and are imported from that subpath so that
+only that one font is bundled. `App.tsx` loads the font with the text fonts.
+
 **Theme-aware styles.** Colours change with light and dark mode, so a component builds its styles
 with `const createStyles = (colors: ColorTokens) => StyleSheet.create({...})` at the bottom of the
 file, and calls `useMemo(() => createStyles(colors), [colors])`. There are still no inline style

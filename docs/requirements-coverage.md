@@ -15,7 +15,7 @@ no test touches the real API). What only a real device or the real API can show 
 
 | #   | Requirement                                  | Implemented in                                                         | Proved by                                             | Deferred                                                   |
 | --- | -------------------------------------------- | ---------------------------------------------------------------------- | ----------------------------------------------------- | ---------------------------------------------------------- |
-| F1  | View a list of cars                          | `CarListScreen`, `CarCard`, `useCars`                                  | 4 screen tests ([F1](#f1--view-a-list-of-cars))       | Search, filter and sort                                    |
+| F1  | View a list of cars                          | `CarListScreen`, `CarCard`, `useCars`, `useCarFilters`                 | 7 screen tests ([F1](#f1--view-a-list-of-cars))       | Sort                                                       |
 | F2  | View the details of a car                    | `CarDetailsScreen`, `CarDetails`, `useCar`                             | 4 screen tests ([F2](#f2--view-the-details-of-a-car)) | Image gallery; availability by date                        |
 | F3  | Place a booking                              | `BookingScreen`, `BookingForm`, `validateBooking`, `bookingRepository` | 8 tests ([F3](#f3--place-a-booking))                  | Editing or cancelling a booking; accounts; payment         |
 | F4  | Use an API                                   | `src/services/api/` against a MockAPI project                          | 8 tests ([F4](#f4--use-an-api))                       | A backend of our own; authentication                       |
@@ -34,6 +34,9 @@ no test touches the real API). What only a real device or the real API can show 
   states.
 - `src/components/CarCard.tsx`, `src/components/CarListHeader.tsx`, `src/components/Skeleton.tsx`
 - `src/hooks/useCars.ts`: the list as a `loading | error | empty | ready` union.
+- `src/hooks/useCarFilters.ts`, `src/utils/filterCars.ts`, `src/components/CarFilters.tsx`:
+  search by make or model (debounced) and multi-select fuel and transmission chips. UI state only:
+  the repository and its cache always hold the whole list. Since PR 7.
 - `src/navigation/RootNavigator.tsx`, `src/navigation/CarsNavigator.tsx`: the list is the first
   screen.
 
@@ -43,8 +46,11 @@ no test touches the real API). What only a real device or the real API can show 
 - `__tests__/screens/CarListScreen.test.tsx` › shows loading skeletons while the cars are being fetched
 - `__tests__/screens/CarListScreen.test.tsx` › shows an error and recovers when the user taps retry
 - `__tests__/screens/CarListScreen.test.tsx` › shows the empty state when there are no cars
+- `__tests__/screens/CarListScreen.test.tsx` › finds cars by make or model once the user stops typing
+- `__tests__/screens/CarListScreen.test.tsx` › filters by several fuels at once and says how many cars match
+- `__tests__/screens/CarListScreen.test.tsx` › shows a no-results state, not the empty state, and clears the filters from it
 
-**Deferred:** search, filtering and sorting.
+**Deferred:** sorting.
 
 ## F2 — View the details of a car
 
@@ -227,6 +233,45 @@ still create it twice.
 
 ---
 
+## Candidates for the design document (PR 7)
+
+PR 7 adds features the project case does not ask for. They are listed here, not as F-rows, so
+the design document can adopt them (as new FE/US entries and class-diagram changes) or reject
+them. Until it does, they are extras, not requirements.
+
+**Data model**
+
+- **`UserProfile`**: `name`, `email`, `preferredLocation?` (`src/types/profile.ts`). Local to the
+  phone: no account, no authentication, never sent on its own. Name and email leave the phone
+  only inside a booking, as `renterName` and `renterEmail`. `Booking` is unchanged, so a booking
+  still does not reference a profile. `preferredLocation` is stored and edited, but nothing else
+  reads it yet.
+- **Favourites**: a plain `string[]` of car ids (`src/storage/favouritesStore.ts`), **not an
+  entity**. A favourite has no attributes of its own (no date, no note, no owner beyond this
+  phone), so a class would add a box to the diagram and nothing else.
+- Both are stored under the existing `STORAGE_VERSION` 2, as new keys (`carrental.v2.profile`,
+  `carrental.v2.favourites`). No stored shape changed, so there was nothing to migrate, and bumping
+  the version would have discarded unsent bookings (K2).
+
+**Feature and user-story candidates**
+
+- _Profile_: as a renter, I can save my name and email on this phone, so I don't retype them for
+  every booking. Evidence:
+  `__tests__/screens/ProfileScreen.test.tsx` › saves the name and email on this phone and says so
+- _Prefill_: when I book, my saved details are already filled in and can still be changed.
+  Evidence:
+  `__tests__/screens/BookingScreen.test.tsx` › fills in the name and email from the profile, and says where they came from
+- _Favourites_: I can save a car from the list or its details and find it in a Saved tab, also
+  after a restart. Evidence:
+  `__tests__/repositories/favouritesRepository.test.ts` › keeps favourites across a restart of the app
+- _Search and filter_: F1 above.
+
+A saved car that disappears from the API is **kept**: Saved leaves it out of the list, says how
+many are no longer listed, and offers to remove them. It is never dropped automatically, because
+the list may be an old saved copy and a car can come back.
+
+---
+
 ## Not proved by automated tests
 
 These need a device, or the real API, and are in the device scripts of the pull requests:
@@ -240,3 +285,6 @@ These need a device, or the real API, and are in the device scripts of the pull 
 - **How it looks and feels.** Animation, haptics, the native date pickers, the keyboard covering
   or not covering the submit button, 200 % text size, and VoiceOver/TalkBack actually reading the
   labels and announcements.
+- **PR 7 on a device.** The heart's spring and selection haptic, the tab bar's icons and
+  indicator (and the icon font loading), chips wrapping at 200 % text on the car list and Profile,
+  and VoiceOver/TalkBack reading the heart's selected state and each chip's checked state.

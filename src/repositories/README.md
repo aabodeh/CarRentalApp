@@ -41,10 +41,20 @@ only_. If a swap forces you to edit a screen, the boundary was drawn wrong.
   - `resetForManualRetry(id)` is the user's "Try again".
 - `syncPolicy.ts`: **the K2 rules, in one place**: delays (2 s / 8 s / 30 s), 4 attempts, what is
   due and what needs a manual retry. It also lists what is deliberately out of scope.
+- `favouritesRepository.ts`: the saved car ids, as a set. Local only: nothing to queue, no sync
+  status. It reads once on first subscription and tells listeners only about real changes. It
+  shows a toggle at once and undoes it if saving fails. Writes wait for the first read, and run
+  one at a time.
+- `profileRepository.ts`: the `UserProfile`, `loading | ready`. `save` re-checks the name and
+  email with `validateRenter`, as `bookingRepository` re-checks a booking.
+
+  Both are shaped for React's `useSyncExternalStore` (`subscribe` + a snapshot getter). The hooks
+  need no provider, the same as `useCars`.
+
 - `syncQueue.ts`: the engine. It is derived from the stored bookings on every run, makes one
   attempt at a time, uses one timer, and makes no attempts while offline. `BookingContext` runs it.
 
-Both are built by factories (`createCarRepository`, `createBookingRepository`) with their
+All are built by factories (`createCarRepository`, `createBookingRepository`, …) with their
 dependencies (API functions, storage) passed in. The app uses one shared instance of each, and
 repository tests build their own with fakes. Hook and screen tests use the helpers in
 `__tests__/helpers/`.
