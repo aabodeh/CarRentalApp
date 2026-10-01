@@ -12,6 +12,7 @@ import AnimatedSection from './AnimatedSection';
 import BottomActionBar from './BottomActionBar';
 import CarHero from './CarHero';
 import DataAge from './DataAge';
+import FavouriteButton from './FavouriteButton';
 import OfflineBanner from './OfflineBanner';
 import PrimaryButton from './PrimaryButton';
 import SpecGrid from './SpecGrid';
@@ -26,6 +27,9 @@ export type CarDetailsProps = {
   scrollY: SharedValue<number>;
   /** Set to the scroll offset where the name block ends, for the header title. */
   titleThreshold: SharedValue<number>;
+  /** Whether the car is saved, and how to change that. The heart shows only with `onToggleSaved`. */
+  saved?: boolean;
+  onToggleSaved?: () => void;
 };
 
 /** The details of one car: hero, name, price, specs, and a pinned "Book this car" bar. */
@@ -36,6 +40,8 @@ export default function CarDetails({
   onBook,
   scrollY,
   titleThreshold,
+  saved = false,
+  onToggleSaved,
 }: CarDetailsProps) {
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
@@ -70,16 +76,27 @@ export default function CarDetails({
             titleThreshold.set(y + height);
           }}
         >
-          <Text style={styles.make} importantForAccessibility="no" accessibilityElementsHidden>
-            {car.make}
-          </Text>
-          <Text
-            style={styles.name}
-            accessibilityRole="header"
-            accessibilityLabel={`${car.make} ${car.model}`}
-          >
-            {car.model}
-          </Text>
+          <View style={styles.nameRow}>
+            <View style={styles.nameText}>
+              <Text style={styles.make} importantForAccessibility="no" accessibilityElementsHidden>
+                {car.make}
+              </Text>
+              <Text
+                style={styles.name}
+                accessibilityRole="header"
+                accessibilityLabel={`${car.make} ${car.model}`}
+              >
+                {car.model}
+              </Text>
+            </View>
+            {onToggleSaved ? (
+              <FavouriteButton
+                carName={`${car.make} ${car.model}`}
+                saved={saved}
+                onToggle={onToggleSaved}
+              />
+            ) : null}
+          </View>
         </AnimatedSection>
         <AnimatedSection index={1} style={styles.section}>
           <Text style={styles.price} accessibilityLabel={`${car.pricePerDay} kroner per day`}>
@@ -122,6 +139,16 @@ const createStyles = (colors: ColorTokens) =>
     section: {
       paddingHorizontal: spacing.lg,
       paddingTop: spacing.xl,
+      gap: spacing.xs,
+    },
+    nameRow: {
+      flexDirection: 'row',
+      alignItems: 'flex-start',
+      gap: spacing.md,
+    },
+    // Takes the room the heart leaves, so a long model name wraps instead of pushing it off.
+    nameText: {
+      flex: 1,
       gap: spacing.xs,
     },
     make: {

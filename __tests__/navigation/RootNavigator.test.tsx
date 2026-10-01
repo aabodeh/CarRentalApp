@@ -5,6 +5,8 @@ import { BookingProvider } from '../../src/context/BookingContext';
 import { cars } from '../../src/data/dummy/cars';
 import RootNavigator from '../../src/navigation/RootNavigator';
 import { makeBookingRepository } from '../helpers/bookingRepositoryFake';
+import { stubFavourites } from '../helpers/favouritesStub';
+import { stubProfile } from '../helpers/profileStub';
 import { stubCarRepository } from '../helpers/carRepositoryStub';
 import { storedBooking } from '../helpers/storedBooking';
 
@@ -65,5 +67,48 @@ describe('RootNavigator', () => {
     await renderApp(fake);
 
     expect(screen.getByLabelText('My bookings, 2 not sent yet')).toBeTruthy();
+  });
+});
+
+describe('RootNavigator tabs', () => {
+  beforeEach(() => {
+    jest.useFakeTimers({ now: new Date(2026, 8, 28, 10, 0) });
+    stubFavourites();
+    stubProfile();
+  });
+
+  afterEach(async () => {
+    await act(async () => {
+      await jest.runOnlyPendingTimersAsync();
+    });
+    jest.useRealTimers();
+    jest.restoreAllMocks();
+  });
+
+  it('has four labelled tabs: Cars, Saved, My bookings and Profile', async () => {
+    await renderApp();
+
+    for (const name of ['Cars', 'Saved', 'My bookings', 'Profile']) {
+      expect(screen.getByLabelText(name)).toBeTruthy();
+    }
+    expect(screen.getByText('Bookings')).toBeTruthy();
+  });
+
+  it('marks only the open tab as selected', async () => {
+    await renderApp();
+
+    expect(screen.getByLabelText('Cars')).toBeSelected();
+    expect(screen.getByLabelText('Saved')).not.toBeSelected();
+  });
+
+  it('opens Saved and Profile from their tabs', async () => {
+    await renderApp();
+
+    fireEvent.press(screen.getByLabelText('Saved'));
+    expect(await screen.findByText('Nothing saved yet')).toBeTruthy();
+    expect(screen.getByLabelText('Saved')).toBeSelected();
+
+    fireEvent.press(screen.getByLabelText('Profile'));
+    expect(await screen.findByRole('header', { name: 'Your details' })).toBeTruthy();
   });
 });

@@ -26,16 +26,25 @@ it; hooks and context are kept out by review.
 - `bookingStore.ts`: `carrental.v2.bookings`, every booking made on this phone as
   `{ booking, sync }`. `sync` is the retry bookkeeping (`attempts`, `nextRetryAt`, `rejected`).
   The K2 retry queue is _derived_ from these records; there is no separate queue key.
+- `profileStore.ts`: `carrental.v2.profile`, the `UserProfile` saved on this phone, or nothing.
+- `favouritesStore.ts`: `carrental.v2.favourites`, the saved car ids as a plain `string[]`.
 
-| Key                     | Holds                                    | Since     |
-| ----------------------- | ---------------------------------------- | --------- |
-| `carrental.v2.cars`     | `Car[]` + `fetchedAt`                    | PR 4 (v1) |
-| `carrental.v2.bookings` | `{ booking: Booking; sync: SyncMeta }[]` | PR 5      |
+| Key                       | Holds                                    | Since     |
+| ------------------------- | ---------------------------------------- | --------- |
+| `carrental.v2.cars`       | `Car[]` + `fetchedAt`                    | PR 4 (v1) |
+| `carrental.v2.bookings`   | `{ booking: Booking; sync: SyncMeta }[]` | PR 5      |
+| `carrental.v2.profile`    | `UserProfile`                            | PR 7      |
+| `carrental.v2.favourites` | `string[]` (car ids)                     | PR 7      |
 
 `STORAGE_VERSION` went from 1 to 2 in PR 5, when the bookings' shape changed. Everything under
 `carrental.v1.*` is ignored from then on and left orphaned. The car cache refills itself; v1
 bookings only ever existed in development builds. The `sync-queue` key reserved in PR 4 was
 dropped in favour of the derived queue.
+
+**PR 7 added two keys without bumping the version.** The rule is to bump when a stored _shape_
+changes, and no existing shape changed: new keys are simply absent on older installs, which reads
+as "nothing stored". A bump would have discarded every stored booking, including unsent `pending`
+ones, and a write that is queued must never be silently dropped (K2).
 
 Tests use the AsyncStorage library's in-memory mock (global, in `jest.setup.js`). Reset it with
 `AsyncStorage.clear()`.

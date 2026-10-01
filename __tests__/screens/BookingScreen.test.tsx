@@ -11,6 +11,7 @@ import { formatPrice } from '../../src/utils/formatPrice';
 import { makeBookingRepository } from '../helpers/bookingRepositoryFake';
 import { stubCarRepository } from '../helpers/carRepositoryStub';
 import { setOffline, setOnline } from '../helpers/network';
+import { stubProfile } from '../helpers/profileStub';
 
 type Props = CarsStackScreenProps<'Booking'>;
 
@@ -210,5 +211,79 @@ describe('BookingScreen', () => {
     expect(fake.stored()[0].booking.syncStatus).toBe('pending');
     expect(fake.postBooking).not.toHaveBeenCalled();
     expect(navigation.navigate).toHaveBeenCalledWith('MyBookingsTab');
+  });
+});
+
+describe('BookingScreen prefill from the profile', () => {
+  beforeEach(() => {
+    jest.useFakeTimers({ now: NOW });
+  });
+
+  afterEach(async () => {
+    await act(async () => {
+      await jest.runOnlyPendingTimersAsync();
+    });
+    jest.useRealTimers();
+    jest.restoreAllMocks();
+  });
+
+  const mette = { name: 'Mette Frederiksen', email: 'mette@example.dk' };
+  const nameValue = () => screen.getByLabelText(/^Your name/).props.value;
+  const emailValue = () => screen.getByLabelText(/^Email/).props.value;
+
+  it('fills in the name and email from the profile, and says where they came from', async () => {
+    stubProfile(mette);
+    await renderScreen();
+
+    expect(nameValue()).toBe('Mette Frederiksen');
+    expect(emailValue()).toBe('mette@example.dk');
+    expect(screen.getByText('Filled in from your profile. You can change them here.')).toBeTruthy();
+  });
+
+  it('leaves the fields empty, with no note, when there is no profile', async () => {
+    stubProfile(null);
+    await renderScreen();
+
+    expect(nameValue()).toBe('');
+    expect(screen.queryByText(/Filled in from your profile/)).toBeNull();
+  });
+
+  it('keeps the prefilled fields editable, and books with what the user changed', async () => {
+    stubProfile(mette);
+    const { stored } = await renderScreen();
+
+    fireEvent.changeText(screen.getByLabelText(/^Your name/), 'Lars Løkke');
+    await act(async () => {
+      submit();
+    });
+
+    expect(stored()[0].booking.renterName).toBe('Lars Løkke');
+    expect(stored()[0].booking.renterEmail).toBe('mette@example.dk');
+    expect(screen.queryByText(/Filled in from your profile/)).toBeNull();
+  });
+
+  it('never overwrites what the user typed when the profile arrives after the form opened', async () => {
+    stubProfile(mette);
+    const repo = stubCarRepository();
+    const props = {
+      navigation: { navigate: jest.fn(), popToTop: jest.fn(), setOptions: jest.fn() },
+      route: { key: 'Booking-test', name: 'Booking', params: { carId: 'car-05' } },
+    } as unknown as Props;
+    render(
+      <HeaderHeightContext.Provider value={HEADER_HEIGHT}>
+        <BookingProvider repository={makeBookingRepository().repository as BookingRepository}>
+          <BookingScreen {...props} />
+        </BookingProvider>
+      </HeaderHeightContext.Provider>
+    );
+    repo.emitCars(cars);
+
+    // Typed before the profile has been read from the phone.
+    expect(emailValue()).toBe('');
+    fireEvent.changeText(screen.getByLabelText(/^Your name/), 'Lars Løkke');
+    await settle();
+
+    expect(nameValue()).toBe('Lars Løkke');
+    expect(emailValue()).toBe('mette@example.dk');
   });
 });

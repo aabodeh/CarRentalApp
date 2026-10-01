@@ -14,8 +14,10 @@ import CarStateView from '../components/CarStateView';
 import Screen from '../components/Screen';
 import { useBookings } from '../context/BookingContext';
 import { useCar } from '../hooks/useCar';
+import { useProfile } from '../hooks/useProfile';
 import type { CarsStackScreenProps } from '../navigation/types';
 import { spacing } from '../theme';
+import type { UserProfile } from '../types';
 import { addDays, todayIsoDate } from '../utils/localDate';
 import {
   hasErrors,
@@ -23,15 +25,25 @@ import {
   type BookingField,
   type BookingFormValues,
 } from '../utils/validateBooking';
+import { fieldsNeedAttention } from '../utils/validateRenter';
 
 type Props = CarsStackScreenProps<'Booking'>;
 
-const fieldsNeedAttention = (count: number) =>
-  `${count} ${count === 1 ? 'field needs' : 'fields need'} attention`;
+const fillEmptyRenterFields = (
+  values: BookingFormValues,
+  profile: UserProfile
+): BookingFormValues => ({
+  ...values,
+  renterName: values.renterName === '' ? profile.name : values.renterName,
+  renterEmail: values.renterEmail === '' ? profile.email : values.renterEmail,
+});
 
 /**
  * Book one car. Once the booking is saved on the phone, the user is taken to My bookings, where its
  * sync status is shown and followed live (K3) — the status they were promised.
+ *
+ * Name and email start from the profile, if there is one. They stay editable, and editing them here
+ * does not change the profile.
  */
 export default function BookingScreen({ route, navigation }: Props) {
   const { carId } = route.params;
@@ -40,12 +52,21 @@ export default function BookingScreen({ route, navigation }: Props) {
   const headerHeight = useHeaderHeight();
 
   const today = useMemo(() => todayIsoDate(), []);
+  const { state: profileState } = useProfile();
+  const profile = profileState.status === 'ready' ? profileState.profile : null;
   const [values, setValues] = useState<BookingFormValues>(() => ({
-    renterName: '',
-    renterEmail: '',
+    renterName: profile?.name ?? '',
+    renterEmail: profile?.email ?? '',
     startDate: today,
     endDate: addDays(today, 1),
   }));
+
+  // A profile read after the form opened fills only what is still empty: never what was typed.
+  const [prefilledFrom, setPrefilledFrom] = useState<UserProfile | null>(profile);
+  if (profile && profile !== prefilledFrom) {
+    setPrefilledFrom(profile);
+    setValues((previous) => fillEmptyRenterFields(previous, profile));
+  }
   // Errors appear after the first submit attempt, then update live as the user fixes them.
   const [showErrors, setShowErrors] = useState(false);
   const nameRef = useRef<TextInput>(null);
@@ -115,6 +136,11 @@ export default function BookingScreen({ route, navigation }: Props) {
             }
             nameRef={nameRef}
             emailRef={emailRef}
+            fromProfile={
+              profile !== null &&
+              values.renterName === profile.name &&
+              values.renterEmail === profile.email
+            }
           />
         </ScrollView>
       </KeyboardAvoidingView>

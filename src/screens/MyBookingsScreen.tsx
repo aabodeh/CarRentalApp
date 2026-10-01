@@ -37,6 +37,7 @@ export default function MyBookingsScreen({ navigation }: Props) {
             </View>
           ) : state.status === 'error' ? (
             <StateView
+              icon="alert-circle-outline"
               title="Couldn't load your bookings"
               message="They are still saved on this phone. Try again in a moment."
               actionLabel="Try again"
@@ -44,6 +45,7 @@ export default function MyBookingsScreen({ navigation }: Props) {
             />
           ) : (
             <StateView
+              icon="calendar-outline"
               title="No bookings yet"
               message="Cars you book appear here, with whether they have reached us."
               actionLabel="Browse cars"

@@ -234,7 +234,8 @@ Rules:
   fire after the test and log an intermittent `act()` warning (FL-012).
 - **Tests near the retry queue flush timers asynchronously.** A retry timer starts an _async_
   send, so a synchronous `act` ends before it does. Tests that render `BookingProvider` use
-  `await act(async () => { await jest.runOnlyPendingTimersAsync(); })` in `afterEach`.
+  `await act(async () => { await jest.runOnlyPendingTimersAsync(); })` in `afterEach`. **Only**
+  those: a list test without the provider keeps the synchronous flush above (FL-021).
 - **Screens that need a provider or navigator context get it in the test.** For example, wrap the
   screen in `BookingProvider repository={createInMemoryBookingRepository()}` and a
   `HeaderHeightContext.Provider`, instead of mocking the hooks.
@@ -437,3 +438,14 @@ checked by a test, check it: `__tests__/docs/requirementsCoverage.test.ts` does 
 requirements table. The same goes for **test instructions**: a device script states an outcome only
 if a test or a run has shown it (FL-019).
 See `docs/ai-log/failures/FL-018 report notes cited an uncounted line total.md`.
+
+### Read a screen's tests before planning to change its structure
+
+An agent's plan gave My bookings an editorial title. An existing test pins the booking rows as the
+screen's only headings, so the change broke it. The plan had not flagged it, because the agent had
+not read that screen's tests. The one-line "fix", adding the title to the expected list, would have
+been exactly the quiet test edit the team forbids.
+
+**Instead:** before a plan restructures an existing screen, read its tests. An assertion on
+structure (the headings, the row order, the number of buttons) is a decision someone made, so the
+plan should flag it rather than discover it. See `docs/ai-log/failures/FL-020 planned a change an existing test forbids.md`.

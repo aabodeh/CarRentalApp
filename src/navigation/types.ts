@@ -9,10 +9,12 @@ export type CarsStackParamList = {
   Booking: { carId: string };
 };
 
-/** The app's root: two tabs. */
+/** The app's root: four tabs. */
 export type RootTabParamList = {
   CarsTab: NavigatorScreenParams<CarsStackParamList>;
+  SavedTab: undefined;
   MyBookingsTab: undefined;
+  ProfileTab: undefined;
 };
 
 /**

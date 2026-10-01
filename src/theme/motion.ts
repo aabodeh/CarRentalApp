@@ -59,3 +59,15 @@ export const headerTitleFade = { distance: 24 } as const;
 
 /** The "booking confirmed" toast (K3): how long it stays before hiding itself. */
 export const toast = { visibleMs: 4_000 } as const;
+
+/**
+ * Favourite toggle: the heart pops to `scale` and springs back (with `pressSpring`). Skipped with
+ * reduce motion on.
+ */
+export const favouritePop = { scale: 1.2 } as const;
+
+/**
+ * How long typing must pause before the car list is filtered. Not an animation, but a duration
+ * all the same, so it lives with the others instead of inline.
+ */
+export const inputDebounce = { ms: 250 } as const;

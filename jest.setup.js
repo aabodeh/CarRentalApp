@@ -47,6 +47,18 @@ jest.mock('expo-network', () => ({
 }));
 
 /**
+ * The Ionicons font, loaded before any test renders, the way App.tsx loads it before the app renders.
+ * Without it an icon's first render loads the font itself and then sets state, outside act(): an
+ * act() warning in whichever test happens to draw the first icon (seen, not guessed: PR 7).
+ * `Font.loadAsync` is jest-expo's mock; it only marks the font as loaded.
+ */
+beforeAll(() => {
+  const { loadAsync } = require('expo-font');
+  const Ionicons = require('@expo/vector-icons/Ionicons').default;
+  return loadAsync(Ionicons.font);
+});
+
+/**
  * Any console.error or console.warn fails the test that produced it.
  *
  * Why: warnings passed silently before — an act() warning (FL-012) and a deprecation warning

@@ -13,6 +13,10 @@ Small, pure, framework-free helpers. No React, no I/O, and trivial to unit test.
   to and from the native picker's local `Date`.
 - `validateBooking`: every booking-form problem at once, with `today` injected. It has two
   callers, the form and `bookingRepository`.
+- `validateRenter`: the name and email rules, shared by `validateBooking` and the profile form, and
+  `fieldsNeedAttention` for the announcement.
+- `filterCars`: search plus chip groups. OR within a group, AND across groups.
+- `nextBooking`: the soonest booking that starts today or later.
 - `carLabels`: display words for transmission and fuel, and the "not available" copy.
 - `formatRelativeTime`: "just now", "5 minutes ago", "yesterday".
 - `toError`: normalises anything thrown into an `Error`.

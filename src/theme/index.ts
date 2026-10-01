@@ -4,14 +4,17 @@ export {
   durations,
   easings,
   entrance,
+  favouritePop,
   headerTitleFade,
   hero,
+  inputDebounce,
   pressScale,
   pressSpring,
   shimmer,
   stagger,
   toast,
 } from './motion';
+export { iconSize } from './iconSize';
 export { opacity } from './opacity';
 export { radii } from './radii';
 export { minTouchTarget, spacing } from './spacing';

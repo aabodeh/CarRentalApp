@@ -1,5 +1,6 @@
 import type { Booking, SyncStatus } from './booking';
 import type { Car, Fuel, Transmission } from './car';
+import type { UserProfile } from './profile';
 
 /**
  * Runtime checks that unknown data really has the shape of our domain types. Used wherever data
@@ -65,4 +66,18 @@ export function isBooking(value: unknown): value is Booking {
 
 export function isBookingArray(value: unknown): value is Booking[] {
   return Array.isArray(value) && value.every(isBooking);
+}
+
+export function isUserProfile(value: unknown): value is UserProfile {
+  return (
+    isRecord(value) &&
+    isString(value.name) &&
+    isString(value.email) &&
+    (value.preferredLocation === undefined || isString(value.preferredLocation))
+  );
+}
+
+/** Favourites are stored as a plain list of car ids. */
+export function isStringArray(value: unknown): value is string[] {
+  return Array.isArray(value) && value.every(isString);
 }

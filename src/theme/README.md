@@ -22,5 +22,12 @@ corporate rental-app look.
   `motion.ts` for the durations, easings, `stagger`, `entrance`, `pressSpring` and `shimmer`.
   `opacity.dimmed` only ever dims images, never text.
 
+**Added in PR 7**, without changing any existing value:
+
+- `iconSize` (`sm 16 / md 24 / lg 32`): Ionicons sizes for chips, controls and tabs, and empty
+  states.
+- `favouritePop`: how far the heart springs when tapped.
+- `inputDebounce`: how long typing must pause before the car list filters.
+
 **Goes here:** values used by more than one component. **Does not go here:** styles for a single
 component. Those live in that component's `StyleSheet.create` block.
