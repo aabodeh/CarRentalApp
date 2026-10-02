@@ -25,7 +25,7 @@ before the deadline.
 
 ## Index — interactions
 
-Chronological. A-001 to A-007 are from 2026-09-22; A-008 to A-010 are from 2026-09-28; A-011 and A-012 are from 2026-09-29; A-013 and A-014 are from 2026-09-30.
+Chronological. A-001 to A-007 are from 2026-09-22; A-008 to A-010 are from 2026-09-28; A-011 and A-012 are from 2026-09-29; A-013 and A-014 are from 2026-09-30; A-015 is from 2026-10-02.
 
 | ID                                                  | Tool        | Mode    | Area | What                                                                                                                          |
 | --------------------------------------------------- | ----------- | ------- | ---- | ----------------------------------------------------------------------------------------------------------------------------- |
@@ -43,6 +43,7 @@ Chronological. A-001 to A-007 are from 2026-09-22; A-008 to A-010 are from 2026-
 | [[A-012 retry queue my bookings and tabs]]          | Claude Code | agentic | code | Retry queue (K2), My bookings, tabs, toast (K3) ([PR #9](https://github.com/aabodeh/CarRentalApp/pull/9))                     |
 | [[A-013 hand-in preparation]]                       | Claude Code | agentic | docs | Hand-in: README, requirements table, report notes, video script ([PR #10](https://github.com/aabodeh/CarRentalApp/pull/10))   |
 | [[A-014 ux depth profile favourites filters]]       | Claude Code | agentic | code | Icon tabs, profile + prefill, favourites, list search and filters ([PR #11](https://github.com/aabodeh/CarRentalApp/pull/11)) |
+| [[A-015 booking details code and qr]]               | Claude Code | agentic | code | Booking details from My bookings, with a code and QR once confirmed (part 1 of 3)                                             |
 
 ## Index — failures
 
@@ -69,6 +70,7 @@ Chronological. A-001 to A-007 are from 2026-09-22; A-008 to A-010 are from 2026-
 | [[FL-019 device script promised a toast that never shows]]       | A-012        | PR #9's device script said a manual retry shows the toast; it does not                                   | A throwaway test, while writing the video script        |
 | [[FL-020 planned a change an existing test forbids]]             | A-014        | Planned an editorial title on My bookings; an existing test pins the booking rows as the only headings   | Running the existing suite before new tests             |
 | [[FL-021 wrong afterEach pattern for list tests]]                | A-014        | New list tests used the async flush reserved for `BookingProvider` tests; hook timeouts in 2 of 8 runs   | The five-run `npm run check` rule                       |
+| [[FL-022 design written to a foreign spec folder]]               | A-015        | Committed the design to a plugin's `docs/superpowers/specs/` instead of the team's log-and-PR practice   | Moha, in the conversation                               |
 
 Add more as they happen.
 
@@ -76,19 +78,20 @@ Add more as they happen.
 
 Long prompts live in `prompts/` and are wiki-linked from the entries that produced and consumed them.
 
-|                                                  | Drafted in     | Used in |
-| ------------------------------------------------ | -------------- | ------- |
-| [[P1]] — initial setup prompt                    | A-001          | A-003   |
-| [[P2]] — plan review changes                     | A-002          | A-003   |
-| [[P3]] — repo configuration prompt               | A-004          | A-005   |
-| [[P4]] — AI dossier backfill prompt              | A-006          | A-007   |
-| [[P5]] — PR 1 foundation prompt                  | pasted by Moha | A-008   |
-| [[P6]] — PR 2 car list prompt                    | pasted by Moha | A-009   |
-| [[P7]] — PR 3 booking flow prompt                | pasted by Moha | A-010   |
-| [[P8]] — PR 4 API and offline prompt             | pasted by Moha | A-011   |
-| [[P9]] — PR 5 retry queue and My bookings prompt | pasted by Moha | A-012   |
-| [[P10]] — PR 6 hand-in preparation prompt        | pasted by Moha | A-013   |
-| [[P11]] — PR 7 UX depth prompt                   | pasted by Moha | A-014   |
+|                                                                   | Drafted in              | Used in |
+| ----------------------------------------------------------------- | ----------------------- | ------- |
+| [[P1]] — initial setup prompt                                     | A-001                   | A-003   |
+| [[P2]] — plan review changes                                      | A-002                   | A-003   |
+| [[P3]] — repo configuration prompt                                | A-004                   | A-005   |
+| [[P4]] — AI dossier backfill prompt                               | A-006                   | A-007   |
+| [[P5]] — PR 1 foundation prompt                                   | pasted by Moha          | A-008   |
+| [[P6]] — PR 2 car list prompt                                     | pasted by Moha          | A-009   |
+| [[P7]] — PR 3 booking flow prompt                                 | pasted by Moha          | A-010   |
+| [[P8]] — PR 4 API and offline prompt                              | pasted by Moha          | A-011   |
+| [[P9]] — PR 5 retry queue and My bookings prompt                  | pasted by Moha          | A-012   |
+| [[P10]] — PR 6 hand-in preparation prompt                         | pasted by Moha          | A-013   |
+| [[P11]] — PR 7 UX depth prompt                                    | pasted by Moha          | A-014   |
+| [[P12]] — booking details, code and QR (conversation, translated) | typed by Moha (Spanish) | A-015   |
 
 ## Reading this vault in Obsidian
 
