@@ -44,6 +44,8 @@ function pairsFor(c: ColorTokens): Pair[] {
   pairs.push(['onAccent on accent', c.onAccent, c.accent, AA_TEXT]);
   // The My bookings tab badge: a count on the failed-status colour.
   pairs.push(['surface on status.failed (tab badge)', c.surface, c.status.failed, AA_TEXT]);
+  // The booking QR code. Text-level contrast, though it is not text: scanners need a strong one.
+  pairs.push(['qr.foreground on qr.background', c.qr.foreground, c.qr.background, AA_TEXT]);
   return pairs;
 }
 

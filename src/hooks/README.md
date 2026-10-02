@@ -19,6 +19,8 @@ Custom React hooks (`useX`) that connect the UI to repositories and context.
   online.
 - `useMyBookings()`: the user's bookings, newest first, with car names from the cached list, as
   `loading | error | empty | ready`.
+- `useBookingDetails(id)`: one booking with its car name, as `loading | error | not-found | ready`.
+  Read from `BookingContext`, so the details screen follows the retry queue live.
 - `useNow(ms)`: the current time, ticking, for "Updated 5 minutes ago".
 - `useFavourites()`: the saved car ids as a set, plus `toggle` and `remove`. There's no loading
   state: it's a local read started by the Cars tab, and empty until it answers.

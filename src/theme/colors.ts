@@ -34,6 +34,11 @@ export type ColorTokens = {
   onAccent: string;
   /** K3 sync status. Always pair with a label or icon, never colour alone. */
   status: Record<SyncStatus, string>;
+  /**
+   * The booking QR code. Dark modules on a light field in *both* schemes: scanners expect it, and
+   * many cannot read an inverted code.
+   */
+  qr: { foreground: string; background: string };
 };
 
 const ink = '#12120F';
@@ -55,6 +60,7 @@ export const lightColors: ColorTokens = {
     failed: '#B42318',
     completed: '#1F7A3A',
   },
+  qr: { foreground: ink, background: '#FFFFFF' },
 };
 
 export const darkColors: ColorTokens = {
@@ -73,6 +79,8 @@ export const darkColors: ColorTokens = {
     failed: '#FF8A7A',
     completed: '#6FD08C',
   },
+  // Not inverted for dark mode, on purpose: see the token's comment.
+  qr: { foreground: ink, background: '#FFFFFF' },
 };
 
 export const colors = { light: lightColors, dark: darkColors };
