@@ -82,6 +82,7 @@ State comes from a new hook, `src/hooks/useBookingDetails.ts`, as a union:
 
 ```ts
 | { status: 'loading' }
+| { status: 'error'; error: Error; retry: () => void }
 | { status: 'not-found' }
 | { status: 'ready'; record: StoredBooking; carName: string }
 ```
@@ -145,7 +146,7 @@ Test names follow the acceptance criteria. The design document gets the Gherkin 
 - `__tests__/components/BookingQrCode.test.tsx`: renders an image labelled with the booking code.
   Encoding correctness is the library's job. Our test checks that the matrix is drawn: a non-empty
   path.
-- `__tests__/hooks/useBookingDetails.test.tsx`: loading; ready with the car name; not-found for an
+- `__tests__/hooks/useBookingDetails.test.tsx`: loading; error with retry; ready with the car name; not-found for an
   unknown id; follows a status change in the context.
 - `__tests__/screens/BookingDetailsScreen.test.tsx`, wrapped in
   `BookingProvider repository={createInMemoryBookingRepository()}` and following the retry-queue
