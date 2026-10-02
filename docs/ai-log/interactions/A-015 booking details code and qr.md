@@ -9,7 +9,7 @@ task: Part 1 of 3 — a booking details screen reached from My bookings, showing
 prompt_or_link: '[[P12]]'
 verification: TODO (Moha)
 decision: TODO (Moha)
-related_pr: TODO (number once the PR is opened)
+related_pr: https://github.com/aabodeh/CarRentalApp/pull/12
 ---
 
 # A-015 — Booking details with code and QR
