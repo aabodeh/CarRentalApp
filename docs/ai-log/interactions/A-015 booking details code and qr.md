@@ -9,7 +9,7 @@ task: Part 1 of 3 — a booking details screen reached from My bookings, showing
 prompt_or_link: '[[P12]]'
 verification: TODO (Moha)
 decision: TODO (Moha)
-related_pr:
+related_pr: TODO (number once the PR is opened)
 ---
 
 # A-015 — Booking details with code and QR
@@ -74,12 +74,56 @@ what happens if the connection drops right as a booking is made.
 - [[FL-022 design written to a foreign spec folder]]: the design was committed to
   `docs/superpowers/specs/`, a plugin's default location, not the team's. Moha caught it. The
   folder is removed in a follow-up commit; the decisions above replace it.
-- Smaller, caught by the AI's own reread before review: the written design said a load error
-  maps to an error state, but the hook's union had no `error` member. It was fixed in `0a818ba`,
-  before that file was removed.
+- [[FL-023 assumed tab navigate would still reach the list]]: the approved design said
+  `navigate('MyBookingsTab')` would keep working unchanged. `tsc` rejected it, and the reason
+  exposed a real bug: after booking, the user could land on an older booking's details. Fixed with
+  `{ screen: 'MyBookingsList', pop: true }`. **Two expectations in `BookingScreen.test.tsx`
+  changed on purpose**, and the PR says so.
+- Smaller ones, each caught at once and not logged separately:
+  - the written design said a load error maps to an error state, but the hook's union had no
+    `error` member. Caught by the AI's own reread and fixed in `0a818ba`, before that file was
+    removed;
+  - two `act()` warnings in the new hook tests: a failed read and a retry resolved outside `act`.
+    Fixed by settling them inside an async `act`, as the My bookings test helper already does;
+    `console` was not muted;
+  - the live-update screen test re-rendered the _same_ element object, which React skips, so the
+    network change never reached the screen. Fixed by building a new element per render;
+  - `import qrcode from 'qrcode-generator'` tripped `import/no-named-as-default` (a warning, which
+    fails lint). Fixed by naming the import `createQrCode`, not by disabling the rule.
 
-**Implementation:** not started at the time of writing. This entry will be extended with what was
-built.
+**What was built** (files under `src/` unless noted):
+
+- Navigation: `navigation/MyBookingsNavigator.tsx` (native stack `MyBookingsList` →
+  `BookingDetails { bookingId }`). Changed: `navigation/types.ts` (`MyBookingsStackParamList`,
+  `MyBookingsStackScreenProps`) and `RootNavigator.tsx` (the tab hosts the stack; the header
+  styles moved into the stack). `BookingScreen` now navigates to the list with `pop: true`
+  (FL-023).
+- Screen and components: `screens/BookingDetailsScreen.tsx` (136 lines, `wc -l`),
+  `components/BookingPass.tsx` (code and QR, or "Not confirmed yet"), `components/BookingQrCode.tsx`.
+  `BookingRow` is pressable, with "Try again" outside the pressable part.
+- Hook and utils: `hooks/useBookingDetails.ts`, `utils/formatBookingCode.ts`
+  (`formatBookingCode`, `spellBookingCode`) and `utils/qrCodePath.ts`. `bookedCarName` was
+  extracted into `utils/carLabels.ts` and is now used by `useMyBookings` too.
+- Theme: `colors.qr`, `qrCodeSize` and `typography.code`. No existing value changed.
+- Dependencies: `react-native-svg` 15.15.4 and `qrcode-generator` ^2.0.4, both installed with
+  `npx expo install`. The lockfile diff only adds packages: those two plus `react-native-svg`'s
+  own (`css-select`, `css-tree` and their dependencies). Nothing removed or upgraded. The
+  `qrcode-generator` API was read from its installed `dist/qrcode.d.ts` before use.
+- Tests: 437 → 463 (`npm run test:ci`, "Tests:" line). New files: `formatBookingCode`,
+  `qrCodePath`, `BookingQrCode`, `useBookingDetails` and `BookingDetailsScreen`; plus one new
+  case in `MyBookingsScreen.test.tsx` and a QR row (light and dark) in `colors.test.ts`.
+  Existing tests changed:
+  - `MyBookingsScreen.test.tsx`: the props type and the route name only (`MyBookingsList`). The
+    header assertion flagged in point 4 passed unchanged.
+  - `BookingScreen.test.tsx`: two `navigate` expectations, see FL-023.
+- Checks: `npm run check` passed. `npm run test:ci` passed 5 times in a row (FL-021's rule).
+  `npx expo export` bundles web, iOS and Android, and lists no new asset.
+- Docs: READMEs for `components/`, `hooks/`, `utils/`, `screens/`, `navigation/` and `theme/`, and
+  a candidate entry plus a device checklist line in `docs/requirements-coverage.md`.
+
+**Not verified by the AI:** nothing was run on a device or simulator. In particular, that a phone
+camera actually scans the QR (light and dark mode), and how VoiceOver/TalkBack read the spelled
+code.
 
 ## Evaluation
 

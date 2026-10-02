@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 
 import { useBookings } from '../context/BookingContext';
 import type { StoredBooking } from '../repositories/bookingRepository';
+import { bookedCarName } from '../utils/carLabels';
 import { useCars } from './useCars';
 
 export type BookingItem = {
@@ -27,17 +28,10 @@ export function useMyBookings(): MyBookingsState {
     if (load.status === 'error') return { status: 'error', error: load.error, retry: reload };
     if (records.length === 0) return { status: 'empty' };
 
-    const names = new Map(
-      carsState.status === 'ready'
-        ? carsState.cars.map((car) => [car.id, `${car.make} ${car.model}`] as const)
-        : []
-    );
+    const cars = carsState.status === 'ready' ? carsState.cars : [];
     const items = [...records]
       .sort((a, b) => b.booking.createdAt.localeCompare(a.booking.createdAt))
-      .map((record) => ({
-        record,
-        carName: names.get(record.booking.carId) ?? `Car ${record.booking.carId}`,
-      }));
+      .map((record) => ({ record, carName: bookedCarName(cars, record.booking.carId) }));
     return { status: 'ready', items };
   }, [records, load, reload, carsState]);
 }

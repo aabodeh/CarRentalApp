@@ -3,7 +3,7 @@ import { act, fireEvent, render, screen } from '@testing-library/react-native';
 import { OFFLINE_TITLE } from '../../src/components/OfflineBanner';
 import { BookingProvider } from '../../src/context/BookingContext';
 import { cars } from '../../src/data/dummy/cars';
-import type { RootTabScreenProps } from '../../src/navigation/types';
+import type { MyBookingsStackScreenProps } from '../../src/navigation/types';
 import MyBookingsScreen from '../../src/screens/MyBookingsScreen';
 import type { StoredBooking } from '../../src/storage/bookingStore';
 import { formatPrice } from '../../src/utils/formatPrice';
@@ -12,14 +12,14 @@ import { stubCarRepository } from '../helpers/carRepositoryStub';
 import { setOffline, setOnline } from '../helpers/network';
 import { storedBooking } from '../helpers/storedBooking';
 
-type Props = RootTabScreenProps<'MyBookingsTab'>;
+type Props = MyBookingsStackScreenProps<'MyBookingsList'>;
 
 async function renderScreen(fake = makeBookingRepository()) {
   const repo = stubCarRepository();
   const navigation = { navigate: jest.fn() };
   const props = {
     navigation,
-    route: { key: 'MyBookings-test', name: 'MyBookingsTab' },
+    route: { key: 'MyBookings-test', name: 'MyBookingsList' },
   } as unknown as Props;
   render(
     <BookingProvider repository={fake.repository}>
@@ -106,6 +106,18 @@ describe('MyBookingsScreen', () => {
     expect(screen.getAllByText(`1.–3. okt. 2026 · ${formatPrice(1498)}`)).toHaveLength(2);
     expect(screen.getByLabelText('Booking status: Confirmed')).toBeTruthy();
     expect(screen.getByLabelText("Booking status: Couldn't save yet")).toBeTruthy();
+  });
+
+  it("opens a booking's details when the user taps it", async () => {
+    const { navigation } = await renderScreen(
+      makeBookingRepository([storedBooking({ id: 'booking-mg8xk2lq-1', carId: 'car-05' })])
+    );
+
+    fireEvent.press(screen.getByRole('button', { name: /Tesla Model 3/ }));
+
+    expect(navigation.navigate).toHaveBeenCalledWith('BookingDetails', {
+      bookingId: 'booking-mg8xk2lq-1',
+    });
   });
 
   it('offers "Try again" on a booking that could not be sent, and sends it', async () => {

@@ -17,5 +17,5 @@ export {
 export { iconSize } from './iconSize';
 export { opacity } from './opacity';
 export { radii } from './radii';
-export { minTouchTarget, spacing } from './spacing';
+export { minTouchTarget, qrCodeSize, spacing } from './spacing';
 export { fontAssets, fontFamily, typography } from './typography';

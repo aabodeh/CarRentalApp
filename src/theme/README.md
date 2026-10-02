@@ -29,5 +29,12 @@ corporate rental-app look.
 - `favouritePop`: how far the heart springs when tapped.
 - `inputDebounce`: how long typing must pause before the car list filters.
 
+**Added for booking details (A-015)**, without changing any existing value:
+
+- `colors.qr` (`foreground` / `background`): the booking QR is ink on white in **both** schemes.
+  Scanners expect dark modules on a light field. The pair has a row in the contrast test.
+- `qrCodeSize` (220): the QR's side, quiet zone included. It fits a 320pt screen with padding.
+- `typography.code`: a booking code, bold, tracked wide and tabular, so it can be read out.
+
 **Goes here:** values used by more than one component. **Does not go here:** styles for a single
 component. Those live in that component's `StyleSheet.create` block.

@@ -38,6 +38,13 @@ above it gets the data from a hook and passes it down.
 - `BookingForm`: the booking form.
 - `BookingRow`: one booking in My bookings. Shows the car, dates, total, `SyncStatusBadge`, a line
   saying what happens next, and **Try again** when only the user can move it on.
+- `BookingRow` is pressable and opens the booking's details. **Try again** sits below the pressable
+  part, not inside it, so VoiceOver can reach it.
+- `BookingPass`: the booking code and QR once the server has confirmed the booking, and "Not
+  confirmed yet" until then. A pass for a booking the server doesn't have would promise something
+  untrue.
+- `BookingQrCode`: the QR, drawn with `react-native-svg` from `utils/qrCodePath`. Dark on light in
+  both schemes, because scanners need it. Read as "QR code for booking …".
 - `SyncToast`: "Your booking for … is confirmed.", shown and announced when a booking succeeds
   after a failed attempt (K3). It hides itself after `toast.visibleMs`.
 
