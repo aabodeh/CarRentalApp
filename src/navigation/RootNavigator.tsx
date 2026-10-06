@@ -7,11 +7,11 @@ import TabLabel from '../components/TabLabel';
 import type { IconName } from '../components/StateView';
 import { useBookings } from '../context/BookingContext';
 import { useTheme } from '../hooks/useTheme';
-import MyBookingsScreen from '../screens/MyBookingsScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import SavedScreen from '../screens/SavedScreen';
-import { typography, type ColorTokens } from '../theme';
+import type { ColorTokens } from '../theme';
 import CarsNavigator from './CarsNavigator';
+import MyBookingsNavigator from './MyBookingsNavigator';
 import type { RootTabParamList } from './types';
 
 const Tab = createBottomTabNavigator<RootTabParamList>();
@@ -29,8 +29,8 @@ const tab = (label: string, icon: IconName, focusedIcon: IconName) => ({
 
 /**
  * Four tabs. The selected one is shown by a filled icon, a bold label and an accent bar, not by
- * colour alone. Cars, Saved and Profile draw their own editorial title; My bookings keeps the
- * native header.
+ * colour alone. Cars, Saved and Profile draw their own editorial title; My bookings keeps a
+ * native header, drawn by its stack (MyBookingsNavigator).
  *
  * "Bookings" shows a badge with the number of bookings that could not be sent (K3), so their
  * status is visible from anywhere in the app. Its accessible name stays "My bookings": it contains
@@ -50,8 +50,6 @@ export default function RootNavigator() {
         tabBarInactiveTintColor: colors.textMuted,
         tabBarStyle: styles.tabBar,
         tabBarBadgeStyle: styles.badge,
-        headerStyle: styles.header,
-        headerTitleStyle: styles.headerTitle,
       }}
     >
       <Tab.Screen
@@ -66,12 +64,9 @@ export default function RootNavigator() {
       />
       <Tab.Screen
         name="MyBookingsTab"
-        component={MyBookingsScreen}
+        component={MyBookingsNavigator}
         options={{
           title: 'My bookings',
-          // The one tab with the native header: its screen has no editorial title, because its
-          // tests pin the booking rows as the screen's only headings (flagged in PR 7).
-          headerShown: true,
           ...tab('Bookings', 'calendar-outline', 'calendar'),
           tabBarBadge: failed > 0 ? failed : undefined,
           tabBarAccessibilityLabel:
@@ -96,12 +91,5 @@ const createStyles = (colors: ColorTokens) =>
     badge: {
       backgroundColor: colors.status.failed,
       color: colors.surface,
-    },
-    header: {
-      backgroundColor: colors.background,
-    },
-    headerTitle: {
-      ...typography.button,
-      color: colors.text,
     },
   });

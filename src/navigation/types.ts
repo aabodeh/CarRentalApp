@@ -9,11 +9,17 @@ export type CarsStackParamList = {
   Booking: { carId: string };
 };
 
+/** The "Bookings" tab: the list, and one booking's details (code and QR). */
+export type MyBookingsStackParamList = {
+  MyBookingsList: undefined;
+  BookingDetails: { bookingId: string };
+};
+
 /** The app's root: four tabs. */
 export type RootTabParamList = {
   CarsTab: NavigatorScreenParams<CarsStackParamList>;
   SavedTab: undefined;
-  MyBookingsTab: undefined;
+  MyBookingsTab: NavigatorScreenParams<MyBookingsStackParamList>;
   ProfileTab: undefined;
 };
 
@@ -25,6 +31,13 @@ export type CarsStackScreenProps<T extends keyof CarsStackParamList> = Composite
   NativeStackScreenProps<CarsStackParamList, T>,
   BottomTabScreenProps<RootTabParamList>
 >;
+
+/** Props for a screen in the Bookings stack; composite, so it can open another tab. */
+export type MyBookingsStackScreenProps<T extends keyof MyBookingsStackParamList> =
+  CompositeScreenProps<
+    NativeStackScreenProps<MyBookingsStackParamList, T>,
+    BottomTabScreenProps<RootTabParamList>
+  >;
 
 export type RootTabScreenProps<T extends keyof RootTabParamList> = BottomTabScreenProps<
   RootTabParamList,

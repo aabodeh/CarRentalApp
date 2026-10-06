@@ -13,3 +13,9 @@ export const spacing = {
 
 /** Minimum width and height of anything tappable (Apple HIG / WCAG 2.5.8 target size). */
 export const minTouchTarget = 44;
+
+/**
+ * Side of the booking QR code, quiet zone included. Large enough for a phone camera at arm's
+ * length, small enough to fit a 320pt-wide screen with the standard padding.
+ */
+export const qrCodeSize = 220;

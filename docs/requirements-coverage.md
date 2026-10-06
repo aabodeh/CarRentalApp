@@ -266,6 +266,13 @@ them. Until it does, they are extras, not requirements.
   `__tests__/repositories/favouritesRepository.test.ts` › keeps favourites across a restart of the app
 - _Search and filter_: F1 above.
 
+_Booking details with code and QR_ (A-015): I can open a booking from My bookings and see
+everything about it. Once the server has confirmed it, I can see its code and a QR, also offline.
+Before that, it says the booking is not confirmed yet. Modifying and cancelling stay deferred.
+Evidence:
+`__tests__/screens/BookingDetailsScreen.test.tsx` › shows the booking code and QR once the booking is confirmed,
+and › says the booking is not confirmed yet, without a code or QR, while it is pending.
+
 A saved car that disappears from the API is **kept**: Saved leaves it out of the list, says how
 many are no longer listed, and offers to remove them. It is never dropped automatically, because
 the list may be an old saved copy and a car can come back.
@@ -288,3 +295,6 @@ These need a device, or the real API, and are in the device scripts of the pull 
 - **PR 7 on a device.** The heart's spring and selection haptic, the tab bar's icons and
   indicator (and the icon font loading), chips wrapping at 200 % text on the car list and Profile,
   and VoiceOver/TalkBack reading the heart's selected state and each chip's checked state.
+- **Booking details on a device.** That a phone camera reads the QR (in light and dark mode), the
+  code read character by character by VoiceOver/TalkBack, the back button from details, and the
+  details screen at 200 % text size.

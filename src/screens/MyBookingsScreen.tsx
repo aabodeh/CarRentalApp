@@ -9,10 +9,10 @@ import { useBookings } from '../context/BookingContext';
 import { useMyBookings, type BookingItem } from '../hooks/useMyBookings';
 import { useNetworkStatus } from '../hooks/useNetworkStatus';
 import { useTheme } from '../hooks/useTheme';
-import type { RootTabScreenProps } from '../navigation/types';
+import type { MyBookingsStackScreenProps } from '../navigation/types';
 import { spacing, typography, type ColorTokens } from '../theme';
 
-type Props = RootTabScreenProps<'MyBookingsTab'>;
+type Props = MyBookingsStackScreenProps<'MyBookingsList'>;
 
 /**
  * Every booking made on this phone, newest first, each with its sync status (K3). Offline is not
@@ -26,6 +26,7 @@ export default function MyBookingsScreen({ navigation }: Props) {
   const styles = useMemo(() => createStyles(colors), [colors]);
 
   const browseCars = () => navigation.navigate('CarsTab', { screen: 'CarList' });
+  const openBooking = (bookingId: string) => navigation.navigate('BookingDetails', { bookingId });
 
   if (state.status !== 'ready') {
     return (
@@ -67,6 +68,7 @@ export default function MyBookingsScreen({ navigation }: Props) {
             record={item.record}
             carName={item.carName}
             index={index}
+            onOpen={openBooking}
             onRetry={retryBooking}
           />
         )}

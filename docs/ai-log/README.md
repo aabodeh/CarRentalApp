@@ -25,50 +25,53 @@ before the deadline.
 
 ## Index — interactions
 
-Chronological. A-001 to A-007 are from 2026-09-22; A-008 to A-010 are from 2026-09-28; A-011 and A-012 are from 2026-09-29; A-013 and A-014 are from 2026-09-30.
+Chronological. A-001 to A-007 are from 2026-09-22; A-008 to A-010 are from 2026-09-28; A-011 and A-012 are from 2026-09-29; A-013 and A-014 are from 2026-09-30; A-015 is from 2026-10-02.
 
-| ID                                                  | Tool        | Mode    | Area | What                                                                                                                          |
-| --------------------------------------------------- | ----------- | ------- | ---- | ----------------------------------------------------------------------------------------------------------------------------- |
-| [[A-001 course context and initial setup prompt]]   | Claude chat | chat    | docs | Course context from the Drive materials, repo review, drafting the setup prompt [[P1]]                                        |
-| [[A-002 setup plan review]]                         | Claude chat | chat    | code | Reviewing Claude Code's setup plan before execution; produced [[P2]]                                                          |
-| [[A-003 project setup scaffolding]]                 | Claude Code | agentic | code | Tooling, folder skeleton, AGENTS.md, this vault, CI ([PR #1](https://github.com/aabodeh/CarRentalApp/pull/1))                 |
-| [[A-004 setup review and repo config prompt]]       | Claude chat | chat    | code | Reviewing the setup result; drafting [[P3]]                                                                                   |
-| [[A-005 repo configuration and expo patch]]         | Claude Code | agentic | code | CI check, branch protection handoff, expo patch ([PR #2](https://github.com/aabodeh/CarRentalApp/pull/2))                     |
-| [[A-006 ai log backfill prompt]]                    | Claude chat | chat    | docs | Drafting the backfill prompt [[P4]]                                                                                           |
-| [[A-007 ai log backfill]]                           | Claude Code | agentic | docs | This chronological backfill ([PR #3](https://github.com/aabodeh/CarRentalApp/pull/3))                                         |
-| [[A-008 domain types design system and dummy data]] | Claude Code | agentic | code | PR 1 foundation: types, tokens, a11y rules, dummy cars ([PR #4](https://github.com/aabodeh/CarRentalApp/pull/4))              |
-| [[A-009 car repository hook and list screen]]       | Claude Code | agentic | code | Car list: repository, hooks, motion, a11y ([PR #5](https://github.com/aabodeh/CarRentalApp/pull/5))                           |
-| [[A-010 details booking flow and context]]          | Claude Code | agentic | code | Details, booking form, BookingContext ([PR #6](https://github.com/aabodeh/CarRentalApp/pull/6))                               |
-| [[A-011 api offline cache and banner]]              | Claude Code | agentic | code | API client, offline cache (K1), offline banner ([PR #7](https://github.com/aabodeh/CarRentalApp/pull/7))                      |
-| [[A-012 retry queue my bookings and tabs]]          | Claude Code | agentic | code | Retry queue (K2), My bookings, tabs, toast (K3) ([PR #9](https://github.com/aabodeh/CarRentalApp/pull/9))                     |
-| [[A-013 hand-in preparation]]                       | Claude Code | agentic | docs | Hand-in: README, requirements table, report notes, video script ([PR #10](https://github.com/aabodeh/CarRentalApp/pull/10))   |
-| [[A-014 ux depth profile favourites filters]]       | Claude Code | agentic | code | Icon tabs, profile + prefill, favourites, list search and filters ([PR #11](https://github.com/aabodeh/CarRentalApp/pull/11)) |
+| ID                                                  | Tool        | Mode    | Area | What                                                                                                                                          |
+| --------------------------------------------------- | ----------- | ------- | ---- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| [[A-001 course context and initial setup prompt]]   | Claude chat | chat    | docs | Course context from the Drive materials, repo review, drafting the setup prompt [[P1]]                                                        |
+| [[A-002 setup plan review]]                         | Claude chat | chat    | code | Reviewing Claude Code's setup plan before execution; produced [[P2]]                                                                          |
+| [[A-003 project setup scaffolding]]                 | Claude Code | agentic | code | Tooling, folder skeleton, AGENTS.md, this vault, CI ([PR #1](https://github.com/aabodeh/CarRentalApp/pull/1))                                 |
+| [[A-004 setup review and repo config prompt]]       | Claude chat | chat    | code | Reviewing the setup result; drafting [[P3]]                                                                                                   |
+| [[A-005 repo configuration and expo patch]]         | Claude Code | agentic | code | CI check, branch protection handoff, expo patch ([PR #2](https://github.com/aabodeh/CarRentalApp/pull/2))                                     |
+| [[A-006 ai log backfill prompt]]                    | Claude chat | chat    | docs | Drafting the backfill prompt [[P4]]                                                                                                           |
+| [[A-007 ai log backfill]]                           | Claude Code | agentic | docs | This chronological backfill ([PR #3](https://github.com/aabodeh/CarRentalApp/pull/3))                                                         |
+| [[A-008 domain types design system and dummy data]] | Claude Code | agentic | code | PR 1 foundation: types, tokens, a11y rules, dummy cars ([PR #4](https://github.com/aabodeh/CarRentalApp/pull/4))                              |
+| [[A-009 car repository hook and list screen]]       | Claude Code | agentic | code | Car list: repository, hooks, motion, a11y ([PR #5](https://github.com/aabodeh/CarRentalApp/pull/5))                                           |
+| [[A-010 details booking flow and context]]          | Claude Code | agentic | code | Details, booking form, BookingContext ([PR #6](https://github.com/aabodeh/CarRentalApp/pull/6))                                               |
+| [[A-011 api offline cache and banner]]              | Claude Code | agentic | code | API client, offline cache (K1), offline banner ([PR #7](https://github.com/aabodeh/CarRentalApp/pull/7))                                      |
+| [[A-012 retry queue my bookings and tabs]]          | Claude Code | agentic | code | Retry queue (K2), My bookings, tabs, toast (K3) ([PR #9](https://github.com/aabodeh/CarRentalApp/pull/9))                                     |
+| [[A-013 hand-in preparation]]                       | Claude Code | agentic | docs | Hand-in: README, requirements table, report notes, video script ([PR #10](https://github.com/aabodeh/CarRentalApp/pull/10))                   |
+| [[A-014 ux depth profile favourites filters]]       | Claude Code | agentic | code | Icon tabs, profile + prefill, favourites, list search and filters ([PR #11](https://github.com/aabodeh/CarRentalApp/pull/11))                 |
+| [[A-015 booking details code and qr]]               | Claude Code | agentic | code | Booking details from My bookings, with a code and QR once confirmed (part 1 of 3) ([PR #12](https://github.com/aabodeh/CarRentalApp/pull/12)) |
 
 ## Index — failures
 
-| ID                                                               | From         | What went wrong                                                                                          | Caught by                                               |
-| ---------------------------------------------------------------- | ------------ | -------------------------------------------------------------------------------------------------------- | ------------------------------------------------------- |
-| [[FL-001 stale react native animated mock]]                      | A-003        | Mocked a React Native module path that does not exist in 0.86                                            | The test suite failed to run                            |
-| [[FL-002 wrong area for setup log entry]]                        | A-002, A-003 | Filed a tooling session under `area: structure`                                                          | Plan review, before execution                           |
-| [[FL-003 expo install dev flag puts packages in dependencies]]   | A-003        | Wrote a broken `npx expo install` flag into AGENTS.md as the team rule                                   | Manual reproduction during A-007                        |
-| [[FL-004 font package root bundles every weight]]                | A-008        | Font package root import bundled all 12 weights (~1.2 MB) to use 3                                       | Reading the `expo export` asset list                    |
-| [[FL-005 eslint disable written to silence a warning]]           | A-009        | Wrote an `eslint-disable` to silence `exhaustive-deps` instead of fixing the deps                        | AI self-review; no tool would have                      |
-| [[FL-006 reanimated value assignment rejected by compiler lint]] | A-009        | Used `sv.value =`, which the React Compiler lint rejects; needs `.get()`/`.set()`                        | Lint                                                    |
-| [[FL-007 safe area jest mock used without default]]              | A-009        | Wired the safe-area Jest mock without `.default`, crashing App in tests                                  | The App smoke test                                      |
-| [[FL-008 npm install changed more than declared]]                | A-010        | A caret-range install bumped 3 navigation packages and dropped 5 transitive ones                         | Reading the npm output and lockfile diff                |
-| [[FL-009 inline style objects despite the rule]]                 | A-010        | Wrote inline style objects twice, against AGENTS.md                                                      | AI self-review; no lint rule                            |
-| [[FL-010 merged transforms cancelled the entrance animation]]    | A-010        | Two animated `transform` styles in one array, so the press scale erased the entrance                     | AI self-review; tests were green                        |
-| [[FL-011 deprecated datetimepicker onChange from memory]]        | A-010        | Used datetimepicker `onChange`, deprecated in v9 (dev warning)                                           | Reading the library source                              |
-| [[FL-012 flaky flatlist act warning shipped in tests]]           | A-009        | CarList tests used real timers; FlatList's deferred render logged an intermittent act() warning, on main | A full run during A-010; reproduced 3/6                 |
-| [[FL-013 repository contract not designed for k1]]               | A-009        | Single-shot `Promise<Car[]>` repository contract could not express K1's cache-then-refresh               | Plan-time review in A-011                               |
-| [[FL-014 invented support path in copy]]                         | A-011        | Failed-booking copy said "Please contact us"; the app has no contact channel                             | AI self-review; nothing else would have                 |
-| [[FL-015 assumed mockapi adds ids to seed]]                      | A-011        | Seed shipped without ids; docs claimed MockAPI adds them. It doesn't, so all 10 cars failed validation   | Checking the real `/cars` reply against the app's guard |
-| [[FL-016 report notes stated counts not yet true]]               | A-012        | Report notes gave log counts (12/16) that did not exist yet (11/15)                                      | AI self-review before commit                            |
-| [[FL-017 committed before reading the check]]                    | A-013        | Commit chained with `;` went through after `tsc` failed                                                  | The typecheck output, read after the commit             |
-| [[FL-018 report notes cited an uncounted line total]]            | A-013        | Report notes said "10 lines out of 1,059"; the real total was 298                                        | AI self-review before commit                            |
-| [[FL-019 device script promised a toast that never shows]]       | A-012        | PR #9's device script said a manual retry shows the toast; it does not                                   | A throwaway test, while writing the video script        |
-| [[FL-020 planned a change an existing test forbids]]             | A-014        | Planned an editorial title on My bookings; an existing test pins the booking rows as the only headings   | Running the existing suite before new tests             |
-| [[FL-021 wrong afterEach pattern for list tests]]                | A-014        | New list tests used the async flush reserved for `BookingProvider` tests; hook timeouts in 2 of 8 runs   | The five-run `npm run check` rule                       |
+| ID                                                               | From         | What went wrong                                                                                                                     | Caught by                                               |
+| ---------------------------------------------------------------- | ------------ | ----------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------- |
+| [[FL-001 stale react native animated mock]]                      | A-003        | Mocked a React Native module path that does not exist in 0.86                                                                       | The test suite failed to run                            |
+| [[FL-002 wrong area for setup log entry]]                        | A-002, A-003 | Filed a tooling session under `area: structure`                                                                                     | Plan review, before execution                           |
+| [[FL-003 expo install dev flag puts packages in dependencies]]   | A-003        | Wrote a broken `npx expo install` flag into AGENTS.md as the team rule                                                              | Manual reproduction during A-007                        |
+| [[FL-004 font package root bundles every weight]]                | A-008        | Font package root import bundled all 12 weights (~1.2 MB) to use 3                                                                  | Reading the `expo export` asset list                    |
+| [[FL-005 eslint disable written to silence a warning]]           | A-009        | Wrote an `eslint-disable` to silence `exhaustive-deps` instead of fixing the deps                                                   | AI self-review; no tool would have                      |
+| [[FL-006 reanimated value assignment rejected by compiler lint]] | A-009        | Used `sv.value =`, which the React Compiler lint rejects; needs `.get()`/`.set()`                                                   | Lint                                                    |
+| [[FL-007 safe area jest mock used without default]]              | A-009        | Wired the safe-area Jest mock without `.default`, crashing App in tests                                                             | The App smoke test                                      |
+| [[FL-008 npm install changed more than declared]]                | A-010        | A caret-range install bumped 3 navigation packages and dropped 5 transitive ones                                                    | Reading the npm output and lockfile diff                |
+| [[FL-009 inline style objects despite the rule]]                 | A-010        | Wrote inline style objects twice, against AGENTS.md                                                                                 | AI self-review; no lint rule                            |
+| [[FL-010 merged transforms cancelled the entrance animation]]    | A-010        | Two animated `transform` styles in one array, so the press scale erased the entrance                                                | AI self-review; tests were green                        |
+| [[FL-011 deprecated datetimepicker onChange from memory]]        | A-010        | Used datetimepicker `onChange`, deprecated in v9 (dev warning)                                                                      | Reading the library source                              |
+| [[FL-012 flaky flatlist act warning shipped in tests]]           | A-009        | CarList tests used real timers; FlatList's deferred render logged an intermittent act() warning, on main                            | A full run during A-010; reproduced 3/6                 |
+| [[FL-013 repository contract not designed for k1]]               | A-009        | Single-shot `Promise<Car[]>` repository contract could not express K1's cache-then-refresh                                          | Plan-time review in A-011                               |
+| [[FL-014 invented support path in copy]]                         | A-011        | Failed-booking copy said "Please contact us"; the app has no contact channel                                                        | AI self-review; nothing else would have                 |
+| [[FL-015 assumed mockapi adds ids to seed]]                      | A-011        | Seed shipped without ids; docs claimed MockAPI adds them. It doesn't, so all 10 cars failed validation                              | Checking the real `/cars` reply against the app's guard |
+| [[FL-016 report notes stated counts not yet true]]               | A-012        | Report notes gave log counts (12/16) that did not exist yet (11/15)                                                                 | AI self-review before commit                            |
+| [[FL-017 committed before reading the check]]                    | A-013        | Commit chained with `;` went through after `tsc` failed                                                                             | The typecheck output, read after the commit             |
+| [[FL-018 report notes cited an uncounted line total]]            | A-013        | Report notes said "10 lines out of 1,059"; the real total was 298                                                                   | AI self-review before commit                            |
+| [[FL-019 device script promised a toast that never shows]]       | A-012        | PR #9's device script said a manual retry shows the toast; it does not                                                              | A throwaway test, while writing the video script        |
+| [[FL-020 planned a change an existing test forbids]]             | A-014        | Planned an editorial title on My bookings; an existing test pins the booking rows as the only headings                              | Running the existing suite before new tests             |
+| [[FL-021 wrong afterEach pattern for list tests]]                | A-014        | New list tests used the async flush reserved for `BookingProvider` tests; hook timeouts in 2 of 8 runs                              | The five-run `npm run check` rule                       |
+| [[FL-022 design written to a foreign spec folder]]               | A-015        | Committed the design to a plugin's `docs/superpowers/specs/` instead of the team's log-and-PR practice                              | Moha, in the conversation                               |
+| [[FL-023 assumed tab navigate would still reach the list]]       | A-015        | Design said `navigate('MyBookingsTab')` still worked with a nested stack; it didn't type-check, and would have opened stale details | `tsc` in `npm run check`                                |
 
 Add more as they happen.
 
@@ -76,19 +79,20 @@ Add more as they happen.
 
 Long prompts live in `prompts/` and are wiki-linked from the entries that produced and consumed them.
 
-|                                                  | Drafted in     | Used in |
-| ------------------------------------------------ | -------------- | ------- |
-| [[P1]] — initial setup prompt                    | A-001          | A-003   |
-| [[P2]] — plan review changes                     | A-002          | A-003   |
-| [[P3]] — repo configuration prompt               | A-004          | A-005   |
-| [[P4]] — AI dossier backfill prompt              | A-006          | A-007   |
-| [[P5]] — PR 1 foundation prompt                  | pasted by Moha | A-008   |
-| [[P6]] — PR 2 car list prompt                    | pasted by Moha | A-009   |
-| [[P7]] — PR 3 booking flow prompt                | pasted by Moha | A-010   |
-| [[P8]] — PR 4 API and offline prompt             | pasted by Moha | A-011   |
-| [[P9]] — PR 5 retry queue and My bookings prompt | pasted by Moha | A-012   |
-| [[P10]] — PR 6 hand-in preparation prompt        | pasted by Moha | A-013   |
-| [[P11]] — PR 7 UX depth prompt                   | pasted by Moha | A-014   |
+|                                                                   | Drafted in              | Used in |
+| ----------------------------------------------------------------- | ----------------------- | ------- |
+| [[P1]] — initial setup prompt                                     | A-001                   | A-003   |
+| [[P2]] — plan review changes                                      | A-002                   | A-003   |
+| [[P3]] — repo configuration prompt                                | A-004                   | A-005   |
+| [[P4]] — AI dossier backfill prompt                               | A-006                   | A-007   |
+| [[P5]] — PR 1 foundation prompt                                   | pasted by Moha          | A-008   |
+| [[P6]] — PR 2 car list prompt                                     | pasted by Moha          | A-009   |
+| [[P7]] — PR 3 booking flow prompt                                 | pasted by Moha          | A-010   |
+| [[P8]] — PR 4 API and offline prompt                              | pasted by Moha          | A-011   |
+| [[P9]] — PR 5 retry queue and My bookings prompt                  | pasted by Moha          | A-012   |
+| [[P10]] — PR 6 hand-in preparation prompt                         | pasted by Moha          | A-013   |
+| [[P11]] — PR 7 UX depth prompt                                    | pasted by Moha          | A-014   |
+| [[P12]] — booking details, code and QR (conversation, translated) | typed by Moha (Spanish) | A-015   |
 
 ## Reading this vault in Obsidian
 

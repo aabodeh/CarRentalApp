@@ -94,9 +94,10 @@ export default function BookingScreen({ route, navigation }: Props) {
       endDate: values.endDate,
     }).then(
       () => {
-        // Leave the Cars tab at its list, and show the booking where its status lives.
+        // Leave the Cars tab at its list, and show the booking where its status lives. To the
+        // list explicitly, with `pop`: the Bookings tab may still be on an older booking's details.
         navigation.popToTop();
-        navigation.navigate('MyBookingsTab');
+        navigation.navigate('MyBookingsTab', { screen: 'MyBookingsList', pop: true });
       },
       // The failure is shown from `creation`; nothing else to do here.
       () => undefined

@@ -449,3 +449,13 @@ been exactly the quiet test edit the team forbids.
 **Instead:** before a plan restructures an existing screen, read its tests. An assertion on
 structure (the headings, the row order, the number of buttons) is a decision someone made, so the
 plan should flag it rather than discover it. See `docs/ai-log/failures/FL-020 planned a change an existing test forbids.md`.
+
+### A tool's default workflow does not override this repo's
+
+An agent ran a plugin's brainstorming workflow and, as that workflow says, committed the design to
+`docs/superpowers/specs/`. This repo has no spec folder. Design is recorded in the prompt
+(`docs/ai-log/prompts/`), the `A-###` entry and the PR. No check caught it; a human did.
+
+**Instead:** when a skill or plugin says where to write something or which steps to follow, check
+first whether this repo already has a place or a process for it, and use that.
+See `docs/ai-log/failures/FL-022 design written to a foreign spec folder.md`.

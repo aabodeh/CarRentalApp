@@ -9,5 +9,8 @@ context, renders it, and handles presses.
 `services/`, `storage/` or `data/`. ESLint fails the build if you try — see
 `eslint.config.js`. Get data through a hook, which goes through a repository.
 
+`BookingDetailsScreen` (the Bookings stack): one booking, its sync status and, once confirmed,
+its code and QR. Reached by tapping a booking in My bookings.
+
 Keep screens short. When a screen passes ~150 lines, pull a piece of it out
 into `src/components/`.

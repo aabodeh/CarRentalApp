@@ -50,6 +50,14 @@ export const typography = {
     lineHeight: 24,
     fontVariant: ['tabular-nums'],
   },
+  /** A booking code, e.g. "MG8XK2LQ-1". Tracked wide and tabular, so it is easy to read out. */
+  code: {
+    fontFamily: fontFamily.bold,
+    fontSize: 28,
+    lineHeight: 34,
+    letterSpacing: 2,
+    fontVariant: ['tabular-nums'],
+  },
   /** Button labels. */
   button: { fontFamily: fontFamily.medium, fontSize: 16, lineHeight: 20 },
 } satisfies Record<string, TextStyle>;

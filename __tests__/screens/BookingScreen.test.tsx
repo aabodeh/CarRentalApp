@@ -171,7 +171,10 @@ describe('BookingScreen', () => {
       syncStatus: 'pending',
     });
     expect(navigation.popToTop).toHaveBeenCalled();
-    expect(navigation.navigate).toHaveBeenCalledWith('MyBookingsTab');
+    expect(navigation.navigate).toHaveBeenCalledWith('MyBookingsTab', {
+      screen: 'MyBookingsList',
+      pop: true,
+    });
   });
 
   it('creates only one booking when submit is pressed twice', async () => {
@@ -210,7 +213,10 @@ describe('BookingScreen', () => {
 
     expect(fake.stored()[0].booking.syncStatus).toBe('pending');
     expect(fake.postBooking).not.toHaveBeenCalled();
-    expect(navigation.navigate).toHaveBeenCalledWith('MyBookingsTab');
+    expect(navigation.navigate).toHaveBeenCalledWith('MyBookingsTab', {
+      screen: 'MyBookingsList',
+      pop: true,
+    });
   });
 });
 
